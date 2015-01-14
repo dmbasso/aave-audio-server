@@ -1,0 +1,31 @@
+# CPP Compiled Object files
+*.o
+
+# CPP Precompiled Headers
+*.gch
+*.pch
+
+# CPP Compiled Dynamic libraries
+*.so
+*.dll
+
+# CPP Compiled Static libraries
+*.lai
+*.la
+*.a
+*.lib
+
+# Executables
+*.exe
+*.out
+*.app
+
+# PYTHON Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+
+# Auto-save files
+*~
+
+# Executable
+sys-server
