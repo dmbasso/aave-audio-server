@@ -7,6 +7,7 @@
 #include "kfsys_source.h"
 #include "kfsys_keyframe.h"
 #include "kfsys_interface.h"
+#include "alsa_interface.h"
 #include "test.h"
 #include "util.h"
 
@@ -125,7 +126,7 @@ void start_keyframes(int delay) {
     }
 }
 
-int render_nframes(int nframes) {
+int render_frames_tofile(int nframes) {
 
 	int data_size = nframes * BUFFLEN * 2 * 2; //16 bit stereo frames
     short buff[BUFFLEN * 2];
@@ -138,6 +139,28 @@ int render_nframes(int nframes) {
     while (nframes--) {
 		sys.render(buff, BUFFLEN);		
 		ofs.write((char *) &buff,2*2*BUFFLEN);
+		// recv iterate
+    }
+    ofs.close();
+}
+
+int render_frames_todriver(int nframes) {
+
+	int data_size = nframes * BUFFLEN * 2 * 2; //16 bit stereo frames
+    short buff[BUFFLEN * 2];
+    memset(buff, 0, BUFFLEN * 2);
+
+    Alsa alsa;
+    alsa.setup_default();
+
+    std::ofstream ofs;
+    ofs.open(("../sounds/output/output.wav"), std::ofstream::out);
+    init_output_wavfile(&ofs, data_size);
+
+    while (nframes--) {
+		sys.render(buff, BUFFLEN);
+		ofs.write((char *) &buff, 2*2*BUFFLEN);
+		alsa.write(buff, BUFFLEN);
 		// recv iterate
     }
     ofs.close();

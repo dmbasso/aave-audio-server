@@ -27,7 +27,8 @@ void source_start_sound(int id);
 void source_add_keyframe(int id, int start, int flags, float posx, float posy, float posz);
 void source_clear_keyframes(int id);
 void start_keyframes(int delay);
-int render_nframes(int nframes);
+int render_frames_tofile(int nframes);
+int render_frames_todriver(int nframes);
 
 //utils
 void source_convert_stereo_to_mono(int source_id);

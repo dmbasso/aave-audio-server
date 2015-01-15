@@ -189,9 +189,11 @@ short KFSystem::add_source(char *recv_buf, int recv_len) {
     printf("adding source: %d\n", recv_buf[2]);
     auto source = new Source;
 
-    if (sources.find(recv_buf[2]) != sources.end()) {
+    if (sources.find(recv_buf[2]) == sources.end()) {
+		if (audio_engine==1)
+			source->init_aave(libaave);
 		sources.insert(make_pair(recv_buf[2], source));
-		source->init_aave(libaave);
+		printf("insert src %d , sources size = %d\n", recv_buf[2], (int) sources.size());
 	}
 	return 3;
 }

@@ -2,7 +2,7 @@
 #define AAVE_INTERFACE_H
 
 extern "C" {
-#include "../libaave/aave.h"
+#include "../../libaave/aave.h"
 }
 
 #define MAX_VERTICES 1024

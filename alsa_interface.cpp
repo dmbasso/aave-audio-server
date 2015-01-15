@@ -2,6 +2,26 @@
 
 #include "alsa_interface.h"
 
+void Alsa::setup_default() {
+
+	const char device[] = "default";
+	int err;
+
+	/* Open the ALSA audio device. Use default system sound output. */
+	err = snd_pcm_open(&alsa_handle, device, SND_PCM_STREAM_PLAYBACK, 0);
+	if (err < 0) {
+		fprintf(stderr, "snd_pcm_open: %s\n", snd_strerror(err));
+		return;
+	}
+	err = snd_pcm_set_params(alsa_handle, SND_PCM_FORMAT_S16,
+				SND_PCM_ACCESS_RW_INTERLEAVED,
+				2, 44100, 0, 100000); /* 100ms latency */
+	if (err < 0) {
+		fprintf(stderr, "snd_pcm_set_params: %s\n", snd_strerror(err));
+		return;
+	}
+}
+
 void Alsa::setup(int rate, int channels, snd_pcm_uframes_t frames)
 {
     const char *device="default";
