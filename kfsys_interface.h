@@ -30,7 +30,8 @@ enum class input_params_cmds {
     mode = 0,
     hrtf = 1,
     reflections = 2,
-    frame_rate = 3
+    frame_rate = 3,
+    audio_engine = 4
 };
 
 enum class reverb_cmds {

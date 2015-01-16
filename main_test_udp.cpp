@@ -64,9 +64,7 @@ int main() {//_latency_check() {
     int recv_len, avail;
     char *recv_buff;
     recv_buff = (char *) malloc(8192);
-    
-	sys.audio_engine = 1;
-    
+
 	/* Aave latency compensation. */
 	//delay += 333;  //mit
     //sys.delay = delay;

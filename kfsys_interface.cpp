@@ -121,6 +121,11 @@ short KFSystem::handle_input_params_cmds(char *recv_buf, int recv_len) {
 			temp = ntohs(*(short*)(recv_buf + 2));
 			printf("frame rate = %d\n",temp);
 			break;
+		case input_params_cmds::audio_engine:
+			temp = ntohs(*(short*)(recv_buf + 2));
+			printf("audio engine = %d\n",temp);
+			audio_engine = temp;
+			break;
 	}
 	return 4;
 }
