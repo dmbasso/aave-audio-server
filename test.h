@@ -2,6 +2,7 @@
 #define TEST_H
 
 #include "kfsys_interface.h"
+#include "aave_interface.h"
 
 extern "C" {
 
@@ -9,6 +10,7 @@ extern "C" {
 void set_hrtf (short hrtf);
 void set_source_position(int id, float x, float y, float z);
 void set_listener_position(float x, float y, float z);
+float* get_listener_position();
 void set_listener_orientation(float x, float y, float z);
 void set_geometry(const char* obj);
 void set_reflection_order(int n);
@@ -18,6 +20,12 @@ void set_reverb_area(unsigned short);
 void set_reverb_volume(unsigned short);
 void aave_update_engine();
 void set_gain(float);
+void increase_gain();
+void decrease_gain();
+void enable_reverb();
+void disable_reverb();
+
+aave_surface* get_aave_surfaces();
 
 // AAVE + DIRECT common commands
 void set_audio_engine(short ae);
@@ -27,8 +35,8 @@ void source_start_sound(int id);
 void source_add_keyframe(int id, int start, int flags, float posx, float posy, float posz);
 void source_clear_keyframes(int id);
 void start_keyframes(int delay);
-int render_frames_tofile(int nframes);
-int render_frames_todriver(int nframes);
+void render_frames_tofile(int nframes);
+void render_frames_todriver(int nframes);
 
 //utils
 void source_convert_stereo_to_mono(int source_id);

@@ -31,6 +31,14 @@ void Libaave::set_listener_position(float x, float y, float z) {
 	aave_set_listener_position(aave, x, y, z);
 }
 
+float* Libaave::get_listener_position() {
+	float* pos = (float*) malloc(sizeof(float) * 3);
+	pos[0] = aave->position[0];
+	pos[1] = aave->position[1];
+	pos[2] = aave->position[2];
+	return pos;
+}
+
 void Libaave::set_listener_orientation(float x, float y, float z) {
 	aave_set_listener_orientation(aave, x, y, z);
 }
@@ -40,8 +48,7 @@ short Libaave::set_geometry(char *recv_buf, int recv_len) {
 	float vertices[MAX_VERTICES][3];
 	struct aave_surface *surface;
 	unsigned short geom, nverts, nfaces, vertex_count, face_count, vert_size, vertex_index;
-    unsigned short i, j;
-    char* material_name;
+    unsigned short i;
 
 	printf("SETTING GEOMETRY:\n");
 	
@@ -135,6 +142,21 @@ void Libaave::set_reverb_volume(unsigned short volume) {
 	aave_reverb_set_volume(aave, volume);
 }
 
+void Libaave::enable_reverb() {
+	aave->reverb_active = 1;
+}
+void Libaave::disable_reverb() {
+	aave->reverb_active = 0;
+}
+
 void Libaave::set_gain(float gain) {
 	aave->gain = gain;
+}
+
+void Libaave::increase_gain() {
+	aave->gain *= 1.5;
+}
+
+void Libaave::decrease_gain() {
+	aave->gain /= 1.5;
 }

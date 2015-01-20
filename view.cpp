@@ -11,28 +11,21 @@
 #include <QMouseEvent>
 #include <QPainter>
 #include <QTimer>
-#include "audio.h"
-#include "geometry.h"
-//#include "imu.h"
+//#include "audio.h"
+//#include "geometry.h" // perform geometry update in a separate Q Thread
 #include "view.h"
-
-#include "compute_reverb_params.h"
 
 #include <math.h> /* M_PI */
 
-extern "C" {
-#include <aave.h>
-}
+#include "aave_interface.h" // must be removed...
+#include "test.h"
 
-//#define VOLUME 11154
-//#define AREA 3590
-//#define RT60 4110
 
-#define VOLUME 5.625
-#define AREA 5
-#define RT60 1126
+#define VOLUME 11154
+#define AREA 3590
+#define RT60 4110
 
-#define nSources 12
+#define nSources 1
 
 View::View()
 	: QWidget()
@@ -52,7 +45,7 @@ View::View()
 	aave = (struct aave *)malloc(sizeof *aave);
 
     /* Read room model. */
-    aave_read_obj(aave, "Geometries/model.obj");
+    aave_read_obj(aave, "../../geometries/model.obj");
 
     aave->volume = VOLUME;
     aave->area = AREA;
@@ -64,10 +57,10 @@ View::View()
     /* aave_hrtf_listen(aave); */
     /* aave_hrtf_tub(aave); */
 
-    aave_init(aave);
+    //aave_init(aave);
 
-    aave->reverb->active = 0;
-    aave->reflections = 1;
+    aave->reverb_active = 0;
+    aave->reflections = 2;
 
     aave->gain = 0.25;
 //    aave->reverb->mix *= 2;
@@ -90,31 +83,12 @@ View::View()
     	aave_set_source_position(source,i*1.5-8.25, 5, 0);  		
     }
 
-//	/* Create one sound source. */
-//    struct aave_source *source;
-//	source = (struct aave_source *)malloc(sizeof *source);
-//	aave_init_source(aave, source);
-//	aave_add_source(aave, source);
-//    aave_set_source_position(source,2, 1.4, 1);
-
-//    /* Create one sound source. */
-//    source = (struct aave_source *)malloc(sizeof *source);
-//    aave_init_source(aave, source);
-//    aave_add_source(aave, source);
-//    aave_set_source_position(source,2, 0.1, 1);
-
-//    /* Create one sound source. */
-//    source = (struct aave_source *)malloc(sizeof *source);
-//    aave_init_source(aave, source);
-//    aave_add_source(aave, source);
-//    aave_set_source_position(source,2.3, 0.75, 0.5);
-
     /* Calculate the boundary box of the room. */
 	float c;
 	struct aave_surface *surface;
 	xmin = ymin = zmin = +9999;
 	xmax = ymax = zmax = -9999;
-	for (surface = aave->surfaces; surface; surface = surface->next) {
+	for (surface = get_aave_surfaces(); surface; surface = surface->next) {
 		for (unsigned i = 0; i < surface->npoints; i++) {
 			c = surface->points[i][0];
 			if (c > xmax)
@@ -147,10 +121,10 @@ View::View()
 	timer->start(200); /* 5Hz */
 
 	/* Create object to handle the auralisation geometry updates. */
-	new Geometry(aave);
+	//new Geometry(aave);
 
 	/* Create object to handle the audio output. */
-	new Audio(aave);
+	//new Audio(aave);
 
 	/* Create object to handle the head tracker. */
 //    Imu *imu = new Imu;
@@ -175,71 +149,75 @@ void View::keyPressEvent(QKeyEvent *event)
 
 	switch (event->key()) {
 	case Qt::Key_0:
-		aave->reflections = 0;
+		set_reflection_order(0);
 		break;
 	case Qt::Key_1:
-		aave->reflections = 1;
+		set_reflection_order(1);
 		break;
 	case Qt::Key_2:
-		aave->reflections = 2;
+		set_reflection_order(2);
 		break;
 	case Qt::Key_3:
-		aave->reflections = 3;
+		set_reflection_order(3);
 		break;
 	case Qt::Key_4:
-		aave->reflections = 4;
+		set_reflection_order(4);
 		break;
 	case Qt::Key_5:
-		aave->reflections = 5;
+		set_reflection_order(5);
 		break;
 	case Qt::Key_6:
-		aave->reflections = 6;
+		set_reflection_order(6);
 		break;
 	case Qt::Key_7:
-		aave->reflections = 7;
+		set_reflection_order(7);
 		break;
 	case Qt::Key_8:
-		aave->reflections = 8;
+		set_reflection_order(8);
 		break;
 	case Qt::Key_9:
-		aave->reflections = 9;
+		set_reflection_order(9);
 		break;
 	case Qt::Key_Left:
 		x = yaw - (M_PI / 180 * 5);
 		if (x < -M_PI)
 			x += 2 * M_PI;
 		yaw = x;
-		aave_set_listener_orientation(aave, roll, pitch, yaw);
+		//aave_set_listener_orientation(aave, roll, pitch, yaw);
+		set_listener_orientation(roll, pitch, yaw);
 		break;
 	case Qt::Key_Right:
 		x = yaw + (M_PI / 180 * 5);
 		if (x > M_PI)
 			x -= 2 * M_PI;
 		yaw = x;
-		aave_set_listener_orientation(aave, roll, pitch, yaw);
+		//aave_set_listener_orientation(aave, roll, pitch, yaw);
+		set_listener_orientation(roll, pitch, yaw);
 		break;
 	case Qt::Key_Up:
-		aave_set_listener_position(aave, aave->position[0] + 0.2,
-				aave->position[1], aave->position[2]);
+		//aave_set_listener_position(aave, aave->position[0] + 0.2,
+		//		aave->position[1], aave->position[2]);
+		set_listener_position(aave->position[0] + 0.2, aave->position[1], aave->position[2]);
 		break;
 	case Qt::Key_Down:
-		aave_set_listener_position(aave, aave->position[0] - 0.2,
-				aave->position[1], aave->position[2]);
+		//aave_set_listener_position(aave, aave->position[0] - 0.2,
+		//		aave->position[1], aave->position[2]);
+		set_listener_position(aave->position[0] - 0.2, aave->position[1], aave->position[2]);
 		break;
 	case Qt::Key_G:
-        aave->gain *= 1.5;
+        increase_gain();
 		break;
 	case Qt::Key_H:
-        aave->gain /= 1.5;
+        decrease_gain();
 		break;
     case Qt::Key_R:
-        aave->reverb->active ^= 1;
+        enable_reverb();
 		break;
     case Qt::Key_T:
-        aave->reverb->level += 0.1;
+        //aave->reverb->level += 0.1;
         break;
     case Qt::Key_Y:
-        aave->reverb->level -= 0.1;
+        //aave->reverb->level -= 0.1;
         break;
 	default:
 		QWidget::keyPressEvent(event);
@@ -261,14 +239,16 @@ void View::mouseMoveEvent(QMouseEvent *event)
 		zscale = (1 + (z - zmin) / (zmax - zmin) * 0.3) * scale;
 		x = x0 + (event->x() - x0p) / zscale;
 		y = y0 - (event->y() - y0p) / zscale;
-		aave_set_listener_position(aave, x, y, z);
+		//aave_set_listener_position(aave, x, y, z);
+		set_listener_position(x, y, z);
 	} else {
 		struct aave_source *source = (struct aave_source *)selectedItem;
 		z = source->position[2];
 		zscale = (1 + (z - zmin) / (zmax - zmin) * 0.3) * scale;
 		x = x0 + (event->x() - x0p) / zscale;
 		y = y0 - (event->y() - y0p) / zscale;
-		aave_set_source_position(source, x, y, z);
+		//aave_set_source_position(source, x, y, z);
+		set_source_position(0, x, y, z);
 	}
 
 	update();
@@ -280,7 +260,7 @@ void View::mousePressEvent(QMouseEvent *event)
 	int x, y, dx, dy;
 
 	/* See if the pointer is on the listener. */
-	convert(aave->position, &x, &y);
+	convert(get_listener_position(), &x, &y);
 	dx = event->x() - x;
 	dy = event->y() - y;
 	if (dx * dx + dy * dy < 32) {
@@ -353,7 +333,7 @@ void View::paintEvent(QPaintEvent *event)
 		painter.drawPolygon(polygons.at(i));
 
 	/* Draw sound sources. */
-	static const QPixmap sourcePixmap("Images/source.png");
+	static const QPixmap sourcePixmap("../../images/source.png");
 	for (struct aave_source *s = aave->sources; s; s = s->next) {
 		convert(s->position, &x, &y);
 		x -= sourcePixmap.width() / 2;
@@ -362,7 +342,7 @@ void View::paintEvent(QPaintEvent *event)
 	}
 
 	/* Draw listener. */
-	static const QImage listenerImage("Images/listener.png");
+	static const QImage listenerImage("../../images/listener.png");
 	QTransform transform;
 	transform.rotate(yaw * (180 / M_PI));
 	QImage image = listenerImage.transformed(transform,

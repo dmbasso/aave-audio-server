@@ -16,6 +16,10 @@ int aave_delay;
 
 extern "C" {
 
+aave_surface* get_aave_surfaces() {
+	return sys.libaave->aave->surfaces;
+}
+
 void set_audio_engine(short ae) {
 
 	sys.set_audio_engine(ae);
@@ -45,6 +49,10 @@ void set_hrtf (short hrtf) {
 void set_listener_position(float x, float y, float z) {
 
 	sys.libaave->set_listener_position(x,y,z);
+}
+
+float* get_listener_position() {
+	return sys.libaave->get_listener_position();
 }
 
 void set_listener_orientation(float x, float y, float z) {
@@ -126,7 +134,7 @@ void start_keyframes(int delay) {
     }
 }
 
-int render_frames_tofile(int nframes) {
+void render_frames_tofile(int nframes) {
 
 	int data_size = nframes * BUFFLEN * 2 * 2; //16 bit stereo frames
     short buff[BUFFLEN * 2];
@@ -144,7 +152,7 @@ int render_frames_tofile(int nframes) {
     ofs.close();
 }
 
-int render_frames_todriver(int nframes) {
+void render_frames_todriver(int nframes) {
 
 	int data_size = nframes * BUFFLEN * 2 * 2; //16 bit stereo frames
     short buff[BUFFLEN * 2];
@@ -198,8 +206,23 @@ void set_reverb_volume(unsigned short volume) {
 	sys.libaave->set_reverb_volume(volume);
 }
 
+void enable_reverb() {
+	sys.libaave->enable_reverb();
+}
+void disable_reverb() {
+	sys.libaave->disable_reverb();
+}
+
 void set_gain(float gain) {
 	sys.libaave->set_gain(gain);
+}
+
+void increase_gain() {
+	sys.libaave->increase_gain();
+}
+
+void decrease_gain() {
+	sys.libaave->decrease_gain();
 }
 
 } // extern "C"
