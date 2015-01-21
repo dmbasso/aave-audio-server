@@ -28,6 +28,7 @@ struct aave_source* get_aave_source(short id) {
 
 	if (sys.sources.find(id) != sys.sources.end())
 		return sys.sources.at(id)->aave_source;
+	return NULL;
 }
 
 aave_surface* get_aave_surfaces() {
@@ -157,8 +158,7 @@ void source_clear_keyframes(int id) {
 void start_keyframes(int delay) {
 
 	printf("starting with delay %i\n", delay);
-    int i;
-    for (i=0; i < sys.sources.size(); i++) {
+    for (unsigned i=0; i < sys.sources.size(); i++) {
         sys.sources[i]->start_keyframes(&sys, delay);
     }
 }
@@ -183,7 +183,7 @@ void render_frames_tofile(int nframes) {
 
 int render_frames_todriver(int nframes) {
 
-	int data_size = nframes * BUFFLEN * 2 * 2; //16 bit stereo frames
+	//int data_size = nframes * BUFFLEN * 2 * 2; //16 bit stereo frames
     short buff[BUFFLEN * 2];
 
     Alsa alsa;

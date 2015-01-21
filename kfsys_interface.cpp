@@ -32,14 +32,12 @@ void KFSystem::set_audio_engine(short ae) {
 
 void KFSystem::render(short *buff, int frames) {
     
-    int i;
-    
 	memset(buff, 0, 2 * frames * sizeof(short));
 
 	if (audio_engine == 1)
 		libaave->update_geometry(); /* updates geometries + sources */
 
-    for (i=0; i<sources.size(); i++) {
+    for (unsigned i=0; i<sources.size(); i++) {
         if (audio_engine == 0)
 			sources[i]->render(global_position, buff, frames);
         if (audio_engine == 1) {
@@ -56,15 +54,13 @@ void KFSystem::render(short *buff, int frames) {
 
 void KFSystem::start_keyframes(int delay) {
     printf("starting with delay %i\n", delay);
-    int i;
-    for (i=0; i<sources.size(); i++) {
+    for (unsigned i=0; i<sources.size(); i++) {
         sources[i]->start_keyframes(this, delay);
     }
 }
 
 int KFSystem::done() {
-    int i;
-    for (i=0; i<sources.size(); i++) {
+    for (unsigned i=0; i<sources.size(); i++) {
         if (!sources[i]->done())
             return 0;
     }
@@ -175,7 +171,8 @@ short KFSystem::handle_reverb_cmds(char *recv_buf, int recv_len) {
 }
 
 short KFSystem::handle_geometry_cmds(char *recv_buf, int recv_len) {
-	short temp, retv=0;
+
+	short retv=0;
 	
 	switch (static_cast<geometry_cmds>(recv_buf[1]))
 	{

@@ -92,7 +92,7 @@ short Libaave::set_geometry(char *recv_buf, int recv_len) {
 short Libaave::set_geometry_material(char *recv_buf, int recv_len) {
 
 	struct aave_surface *surface;
-	int geom = (unsigned char) recv_buf[2];
+	unsigned geom = (unsigned char) recv_buf[2];
 	int len = (unsigned char) recv_buf[3];
 	int j;
     string material_name(&recv_buf[4], len);
