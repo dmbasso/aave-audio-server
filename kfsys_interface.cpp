@@ -44,7 +44,6 @@ void KFSystem::render(short *buff, int frames) {
 			sources[i]->render(global_position, buff, frames);
         if (audio_engine == 1) {
 			sources[i]->render(global_position, buff, frames);
-			buffer_stereo_to_mono(buff, frames*2);
 			libaave->put_audio(sources[i]->aave_source, buff, frames);
         }
     }

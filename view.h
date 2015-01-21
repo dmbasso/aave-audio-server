@@ -28,16 +28,13 @@ private slots:
 	void setOrientation(float, float, float);
 
 private:
-	/* The auralisation engine. */
-	struct aave *aave;
-
 	/*
-	 * Pointer to the currently selected item (the item being dragged).
-	 * It is a struct aave_source * if the currently selected item
-	 * is a sound source, or it is a struct aave * if the
-	 * currently selected item is the listener.
+	 * Id of the currently selected item (the item being dragged).
+	 * -2   -> no selection
+	 * -1   -> listener
+	 * >= 0 -> sources
 	 */
-	void *selectedItem;
+	short selectedItem;
 
 	/* Current orientation (radians). */
 	float roll, pitch, yaw;

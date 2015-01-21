@@ -3,6 +3,7 @@
 #include <string.h>
 
 #include <fstream>
+#include <iostream>
 
 #include "kfsys_source.h"
 #include "kfsys_keyframe.h"
@@ -15,6 +16,19 @@ KFSystem sys;
 int aave_delay;
 
 extern "C" {
+
+struct aave* get_aave_engine() {
+
+	if (sys.libaave->aave != NULL)
+		return sys.libaave->aave;
+	return NULL;
+}
+
+struct aave_source* get_aave_source(short id) {
+
+	if (sys.sources.find(id) != sys.sources.end())
+		return sys.sources.at(id)->aave_source;
+}
 
 aave_surface* get_aave_surfaces() {
 	return sys.libaave->aave->surfaces;
@@ -47,7 +61,7 @@ void set_hrtf (short hrtf) {
 }
 
 void set_listener_position(float x, float y, float z) {
-
+	std::cout << "setting listener position: " << x << y << z << endl;
 	sys.libaave->set_listener_position(x,y,z);
 }
 
@@ -65,9 +79,14 @@ void set_geometry(const char* obj) {
 	aave_read_obj(sys.libaave->aave, obj);
 }
 
-void set_reflection_order(int n) {
+void set_reflection_order(unsigned n) {
 
 	sys.libaave->aave->reflections = n;
+}
+
+unsigned get_reflection_order() {
+
+	return sys.libaave->aave->reflections;
 }
 
 void add_source(int id) {
@@ -93,9 +112,19 @@ void set_source_sound(int id, const char* name) {
 }
 
 void set_source_position(int id, float x, float y, float z) {
-    
-    if (sys.sources.find(id) != sys.sources.end() && sys.audio_engine == 1)
+
+    if (sys.sources.find(id) != sys.sources.end() && sys.audio_engine == 1) {
+		printf("setting source %d position: %.2f, %.2f, %.2f\n", id, x, y, z);
     	sys.sources.at(id)->set_position(x, y, z);
+    }
+}
+
+float* get_source_position(int id) {
+
+	if (sys.sources.find(id) != sys.sources.end() && sys.audio_engine == 1)
+		return sys.sources.at(id)->get_position();
+    else
+		return NULL;
 }
 
 void source_start_sound(int id) {
@@ -152,26 +181,26 @@ void render_frames_tofile(int nframes) {
     ofs.close();
 }
 
-void render_frames_todriver(int nframes) {
+int render_frames_todriver(int nframes) {
 
 	int data_size = nframes * BUFFLEN * 2 * 2; //16 bit stereo frames
     short buff[BUFFLEN * 2];
-    memset(buff, 0, BUFFLEN * 2);
 
     Alsa alsa;
     alsa.setup_default();
 
-    std::ofstream ofs;
-    ofs.open(("../sounds/output/output.wav"), std::ofstream::out);
-    init_output_wavfile(&ofs, data_size);
+//    std::ofstream ofs;
+//    ofs.open(("../sounds/output/output.wav"), std::ofstream::out);
+//    init_output_wavfile(&ofs, data_size);
 
     while (nframes--) {
 		sys.render(buff, BUFFLEN);
-		ofs.write((char *) &buff, 2*2*BUFFLEN);
+//		ofs.write((char *) &buff, 2*2*BUFFLEN);
 		alsa.write(buff, BUFFLEN);
 		// recv iterate
     }
-    ofs.close();
+//    ofs.close();
+    return 1;
 }
 
 void source_convert_stereo_to_mono(int source_id) {

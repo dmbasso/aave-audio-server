@@ -1,19 +1,25 @@
 #ifndef TEST_H
 #define TEST_H
 
+#include <map>
+
 #include "kfsys_interface.h"
 #include "aave_interface.h"
 
 extern "C" {
 
 // AAVE only commands
+struct aave* get_aave_engine();
+struct aave_source* get_aave_source(short id);
 void set_hrtf (short hrtf);
 void set_source_position(int id, float x, float y, float z);
+float* get_source_position(int id);
 void set_listener_position(float x, float y, float z);
 float* get_listener_position();
 void set_listener_orientation(float x, float y, float z);
 void set_geometry(const char* obj);
-void set_reflection_order(int n);
+void set_reflection_order(unsigned n);
+unsigned get_reflection_order();
 void init_reverb();
 void set_reverb_rt60(unsigned short);
 void set_reverb_area(unsigned short);
@@ -36,7 +42,7 @@ void source_add_keyframe(int id, int start, int flags, float posx, float posy, f
 void source_clear_keyframes(int id);
 void start_keyframes(int delay);
 void render_frames_tofile(int nframes);
-void render_frames_todriver(int nframes);
+int render_frames_todriver(int nframes);
 
 //utils
 void source_convert_stereo_to_mono(int source_id);
