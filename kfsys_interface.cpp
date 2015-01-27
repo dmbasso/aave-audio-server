@@ -20,6 +20,7 @@ KFSystem::KFSystem() {
         libaave = new Libaave();  //init aave in this contructor.
     }
     audio_engine = 0; // default audio engine = direct sound
+    write_frames = -1;
 	global_position = 0;
 	delay = 0;
 }
@@ -38,7 +39,7 @@ void KFSystem::render(short *buff, int frames) {
 	if (audio_engine == 1)
 		libaave->update_geometry(); /* updates geometries + sources */
 
-    for (i=0; i<sources.size(); i++) {
+    for (unsigned i=0; i<sources.size(); i++) {
         if (audio_engine == 0)
 			sources[i]->render(global_position, buff, frames);
         if (audio_engine == 1) {
@@ -56,15 +57,13 @@ void KFSystem::render(short *buff, int frames) {
 
 void KFSystem::start_keyframes(int delay) {
     printf("starting with delay %i\n", delay);
-    int i;
-    for (i=0; i<sources.size(); i++) {
+    for (unsigned i=0; i<sources.size(); i++) {
         sources[i]->start_keyframes(this, delay);
     }
 }
 
 int KFSystem::done() {
-    int i;
-    for (i=0; i<sources.size(); i++) {
+    for (unsigned i=0; i<sources.size(); i++) {
         if (!sources[i]->done())
             return 0;
     }
@@ -80,9 +79,19 @@ short KFSystem::cmds_output_set_frame(char *recv_buf, int recv_len) {
     
     start_keyframes(delay);
     
-//    int start_frame = ntohl(*(long*)(recv_buf + 3)); // ignore it
+	//int start_frame = ntohl(*(long*)(recv_buf + 2)); // ignore it
     //delay += ntohs(*(short*)(recv_buf + 7));
     //printf("delay from net: %i\n", delay);
+    return 6;
+}
+
+short KFSystem::cmds_output_write_frames(char *recv_buf, int recv_len) {
+
+    start_keyframes(delay);
+
+	int nframes = ntohl(*(int32_t*)(recv_buf + 2)); // ignore it
+	write_frames = nframes;
+    printf("write %d frames\n", nframes);
     return 6;
 }
 
@@ -120,6 +129,11 @@ short KFSystem::handle_input_params_cmds(char *recv_buf, int recv_len) {
 		case input_params_cmds::frame_rate:
 			temp = ntohs(*(short*)(recv_buf + 2));
 			printf("frame rate = %d\n",temp);
+			break;
+		case input_params_cmds::audio_engine:
+			temp = ntohs(*(short*)(recv_buf + 2));
+			printf("audio engine = %d\n",temp);
+			audio_engine = temp;
 			break;
 	}
 	return 4;
@@ -160,7 +174,8 @@ short KFSystem::handle_reverb_cmds(char *recv_buf, int recv_len) {
 }
 
 short KFSystem::handle_geometry_cmds(char *recv_buf, int recv_len) {
-	short temp, retv=0;
+
+	short retv=0;
 	
 	switch (static_cast<geometry_cmds>(recv_buf[1]))
 	{
@@ -241,6 +256,9 @@ void KFSystem::handle_datagram(char *recv_buf, int recv_len) {
 			            break;
 			        case output_cmds::set_frame:
 			        	inc += cmds_output_set_frame(recv_buf + inc, recv_len);
+			            break;
+					case output_cmds::write_frames:
+						inc += cmds_output_write_frames(recv_buf + inc, recv_len);
 			            break;	
             	}            	
                 break;          

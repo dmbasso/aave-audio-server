@@ -23,14 +23,16 @@ enum class kfsys_cmds {
 
 enum class output_cmds {
 	iterate = 0,
-	set_frame = 1
+	set_frame = 1,
+	write_frames = 2
 };
 
 enum class input_params_cmds {
     mode = 0,
     hrtf = 1,
     reflections = 2,
-    frame_rate = 3
+    frame_rate = 3,
+    audio_engine = 4
 };
 
 enum class reverb_cmds {
@@ -55,6 +57,7 @@ class KFSystem {
 	    static Libaave *libaave;
     	map<short, Source *> sources;
 		short audio_engine; //0 = direct, 1 = aave
+		int write_frames;
     	uint64_t global_position;
     	int64_t delay;
     	
@@ -71,6 +74,7 @@ class KFSystem {
     	short cmds_listener_set_position(char *, int);
     	short cmds_output_iterate(char *, int);
     	short cmds_output_set_frame(char *, int);
+		short cmds_output_write_frames(char *, int);
     	short add_source(char *, int);
     	short remove_source(char *, int);
     	short clear_sources(char *, int);

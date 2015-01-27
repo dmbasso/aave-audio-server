@@ -40,6 +40,7 @@ class Source {
 		
 		void init_aave(Libaave *libaave);
 		void set_position(float, float, float);
+		float* get_position();
 
     	short handle_datagram(char *, int);
     	short handle_add_keyframe(char *, int);

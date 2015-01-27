@@ -3,6 +3,7 @@
 #include <string.h>
 
 #include <fstream>
+#include <iostream>
 
 #include "kfsys_source.h"
 #include "kfsys_keyframe.h"
@@ -15,6 +16,24 @@ KFSystem sys;
 int aave_delay;
 
 extern "C" {
+
+struct aave* get_aave_engine() {
+
+	if (sys.libaave->aave != NULL)
+		return sys.libaave->aave;
+	return NULL;
+}
+
+struct aave_source* get_aave_source(short id) {
+
+	if (sys.sources.find(id) != sys.sources.end())
+		return sys.sources.at(id)->aave_source;
+	return NULL;
+}
+
+aave_surface* get_aave_surfaces() {
+	return sys.libaave->aave->surfaces;
+}
 
 void set_audio_engine(short ae) {
 
@@ -43,8 +62,12 @@ void set_hrtf (short hrtf) {
 }
 
 void set_listener_position(float x, float y, float z) {
-
+	std::cout << "setting listener position: " << x << y << z << endl;
 	sys.libaave->set_listener_position(x,y,z);
+}
+
+float* get_listener_position() {
+	return sys.libaave->get_listener_position();
 }
 
 void set_listener_orientation(float x, float y, float z) {
@@ -57,9 +80,14 @@ void set_geometry(const char* obj) {
 	aave_read_obj(sys.libaave->aave, obj);
 }
 
-void set_reflection_order(int n) {
+void set_reflection_order(unsigned n) {
 
 	sys.libaave->aave->reflections = n;
+}
+
+unsigned get_reflection_order() {
+
+	return sys.libaave->aave->reflections;
 }
 
 void add_source(int id) {
@@ -85,9 +113,19 @@ void set_source_sound(int id, const char* name) {
 }
 
 void set_source_position(int id, float x, float y, float z) {
-    
-    if (sys.sources.find(id) != sys.sources.end() && sys.audio_engine == 1)
+
+    if (sys.sources.find(id) != sys.sources.end() && sys.audio_engine == 1) {
+		printf("setting source %d position: %.2f, %.2f, %.2f\n", id, x, y, z);
     	sys.sources.at(id)->set_position(x, y, z);
+    }
+}
+
+float* get_source_position(int id) {
+
+	if (sys.sources.find(id) != sys.sources.end() && sys.audio_engine == 1)
+		return sys.sources.at(id)->get_position();
+    else
+		return NULL;
 }
 
 void source_start_sound(int id) {
@@ -120,13 +158,12 @@ void source_clear_keyframes(int id) {
 void start_keyframes(int delay) {
 
 	printf("starting with delay %i\n", delay);
-    int i;
-    for (i=0; i < sys.sources.size(); i++) {
+    for (unsigned i=0; i < sys.sources.size(); i++) {
         sys.sources[i]->start_keyframes(&sys, delay);
     }
 }
 
-int render_frames_tofile(int nframes) {
+void render_frames_tofile(int nframes) {
 
 	int data_size = nframes * BUFFLEN * 2 * 2; //16 bit stereo frames
     short buff[BUFFLEN * 2];
@@ -146,16 +183,10 @@ int render_frames_tofile(int nframes) {
 
 int render_frames_todriver(int nframes) {
 
-	int data_size = nframes * BUFFLEN * 2 * 2; //16 bit stereo frames
     short buff[BUFFLEN * 2];
-    memset(buff, 0, BUFFLEN * 2);
 
     Alsa alsa;
     alsa.setup_default();
-
-    std::ofstream ofs;
-    ofs.open(("../sounds/output/output.wav"), std::ofstream::out);
-    init_output_wavfile(&ofs, data_size);
 
     while (nframes--) {
 		sys.render(buff, BUFFLEN);
@@ -163,7 +194,7 @@ int render_frames_todriver(int nframes) {
 		alsa.write(buff, BUFFLEN);
 		// recv iterate
     }
-    ofs.close();
+    return 1;
 }
 
 void source_convert_stereo_to_mono(int source_id) {
@@ -196,10 +227,23 @@ void set_reverb_area(unsigned short area) {
 
 void set_reverb_volume(unsigned short volume) {
 	sys.libaave->set_reverb_volume(volume);
+	aave_reverb_print_parameters(sys.libaave->aave, sys.libaave->aave->reverb);
+}
+
+void enable_disable_reverb() {
+	sys.libaave->enable_disable_reverb();
 }
 
 void set_gain(float gain) {
 	sys.libaave->set_gain(gain);
+}
+
+void increase_gain() {
+	sys.libaave->increase_gain();
+}
+
+void decrease_gain() {
+	sys.libaave->decrease_gain();
 }
 
 } // extern "C"

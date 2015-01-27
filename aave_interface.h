@@ -16,6 +16,7 @@ class Libaave {
 		
 		Libaave();
 		void set_listener_position(float, float, float);
+		float* get_listener_position();
 		void set_listener_orientation(float, float, float);
 		short set_geometry(char *recv_buf, int recv_len);
 		short set_geometry_material(char *recv_buf, int recv_len);
@@ -23,10 +24,13 @@ class Libaave {
 		void put_audio(struct aave_source*, short *, int);
 		void get_binaural_audio(short *, int);
 		void set_gain(float);
+		void increase_gain();
+		void decrease_gain();
 		void init_reverb();
 		void set_reverb_rt60(unsigned short);
 		void set_reverb_area(unsigned short);
 		void set_reverb_volume(unsigned short);
+		void enable_disable_reverb();
 		
 		
 };
