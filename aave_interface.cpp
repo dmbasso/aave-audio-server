@@ -142,11 +142,8 @@ void Libaave::set_reverb_volume(unsigned short volume) {
 	aave_reverb_set_volume(aave, volume);
 }
 
-void Libaave::enable_reverb() {
-	aave->reverb_active = 1;
-}
-void Libaave::disable_reverb() {
-	aave->reverb_active = 0;
+void Libaave::enable_disable_reverb() {
+	aave->reverb_active ^= 1;
 }
 
 void Libaave::set_gain(float gain) {

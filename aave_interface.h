@@ -30,8 +30,7 @@ class Libaave {
 		void set_reverb_rt60(unsigned short);
 		void set_reverb_area(unsigned short);
 		void set_reverb_volume(unsigned short);
-		void enable_reverb();
-		void disable_reverb();
+		void enable_disable_reverb();
 		
 		
 };

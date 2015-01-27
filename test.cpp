@@ -233,13 +233,11 @@ void set_reverb_area(unsigned short area) {
 
 void set_reverb_volume(unsigned short volume) {
 	sys.libaave->set_reverb_volume(volume);
+	aave_reverb_print_parameters(sys.libaave->aave, sys.libaave->aave->reverb);
 }
 
-void enable_reverb() {
-	sys.libaave->enable_reverb();
-}
-void disable_reverb() {
-	sys.libaave->disable_reverb();
+void enable_disable_reverb() {
+	sys.libaave->enable_disable_reverb();
 }
 
 void set_gain(float gain) {

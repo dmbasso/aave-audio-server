@@ -28,8 +28,7 @@ void aave_update_engine();
 void set_gain(float);
 void increase_gain();
 void decrease_gain();
-void enable_reverb();
-void disable_reverb();
+void enable_disable_reverb();
 
 aave_surface* get_aave_surfaces();
 

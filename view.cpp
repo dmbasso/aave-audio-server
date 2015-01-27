@@ -1,8 +1,6 @@
 /*
- * demo-qt5/view.cpp: view of the auralisation world
- *
+ * view.cpp: view of the auralisation world
  * Copyright 2013 Universidade de Aveiro
- *
  * Funded by FCT project AcousticAVE (PTDC/EEA-ELC/112137/2009)
  *
  * Written by Andre B. Oliveira <abo@ua.pt>
@@ -16,7 +14,7 @@
 #include "view.h"
 #include "test.h"
 
-#define NSOURCES 12
+#define NSOURCES 9
 
 View::View()
 	: QWidget()
@@ -142,13 +140,13 @@ void View::keyPressEvent(QKeyEvent *event)
         decrease_gain();
 		break;
     case Qt::Key_R:
-        enable_reverb();
+        enable_disable_reverb();
 		break;
     case Qt::Key_T:
-        //aave->reverb->level += 0.1;
+        get_aave_engine()->reverb->level += 0.1;
         break;
     case Qt::Key_Y:
-        //aave->reverb->level -= 0.1;
+        get_aave_engine()->reverb->level -= 0.1;
         break;
 	default:
 		QWidget::keyPressEvent(event);
@@ -219,7 +217,7 @@ void View::paintEvent(QPaintEvent *event)
 	int x, y;
 
 	string image_file_path("../../images/");
-	const char *images[] = {"bassoon", "cello", "clarinet","double_bass", "ensemble_strings", "ensemble_strings_pizzicato", "flute", "harp", "oboe", "percussion", "trombone", "violin"};
+	const char *images[] = {"cello", "clarinet","double_bass", "flute", "harp", "oboe", "percussion", "trombone", "violin"};
 	vector<string> image_files(images, images + NSOURCES);
 	string file_type(".png");
 

@@ -1,8 +1,6 @@
 /*
- * demo-qt5/view.h: view of the auralisation world
- *
+ * view.h: view of the auralisation world
  * Copyright 2013 Universidade de Aveiro
- *
  * Funded by FCT project AcousticAVE (PTDC/EEA-ELC/112137/2009)
  *
  * Written by Andre B. Oliveira <abo@ua.pt>
