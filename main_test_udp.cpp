@@ -1,3 +1,6 @@
+/** To play the output .raw file using aplay run:
+  * $aplay -t raw -c 2 -f cd -r 44100 output.raw */
+
 #include <stdio.h>
 #include <fcntl.h>
 #include <stdlib.h>
@@ -55,17 +58,15 @@ int main() {//_latency_check() {
     KFSystem sys;    
     Alsa alsa;
 
-//    alsa.setup(44100, 2, 8192);
-//    int alsa_bufflen = alsa.avail();
-//    printf("bufflen: %i\n", alsa_bufflen);
+    alsa.setup(44100, 2, 8192);
+    int alsa_bufflen = alsa.avail();
+    printf("bufflen: %i\n", alsa_bufflen);
 
-	alsa.setup_default();   
+//	alsa.setup_default();   
     
     int recv_len, avail;
     char *recv_buff;
     recv_buff = (char *) malloc(8192);
-    
-	sys.audio_engine = 1;
     
 	/* Aave latency compensation. */
 	//delay += 333;  //mit
@@ -73,6 +74,8 @@ int main() {//_latency_check() {
 	//delay += -598;  //cipic
 	//delay += -1124; //listen
 	//delay += -2169; //tub
+	
+	sys.libaave->set_gain(5);
 
     FILE *out = fopen("../sounds/output/out_udp.raw", "wb");
     //int first_packet = 0;
@@ -85,9 +88,11 @@ int main() {//_latency_check() {
         
         if (recv_len > 0)        	
         	sys.handle_datagram(recv_buff, recv_len);
-        
-        sys.render(buff, BUFFLEN);
-        alsa.write(buff, BUFFLEN);        
+        	
+        if (sys.render_state) {
+        	sys.render(buff, BUFFLEN);
+        	alsa.write(buff, BUFFLEN);
+        }        
     }
     alsa.shutdown();
 }

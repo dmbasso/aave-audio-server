@@ -60,6 +60,7 @@ class KFSystem {
 		int write_frames;
     	uint64_t global_position;
     	int64_t delay;
+    	short render_state;
     	
     	KFSystem();
     	void render(short *buff, int bufflen);

@@ -23,6 +23,7 @@ KFSystem::KFSystem() {
     write_frames = -1;
 	global_position = 0;
 	delay = 0;
+	render_state = 0;
 }
 
 void KFSystem::set_audio_engine(short ae) {
@@ -31,8 +32,6 @@ void KFSystem::set_audio_engine(short ae) {
 }
 
 void KFSystem::render(short *buff, int frames) {
-    
-    int i;
     
 	memset(buff, 0, 2 * frames * sizeof(short));
 
@@ -44,7 +43,6 @@ void KFSystem::render(short *buff, int frames) {
 			sources[i]->render(global_position, buff, frames);
         if (audio_engine == 1) {
 			sources[i]->render(global_position, buff, frames);
-			buffer_stereo_to_mono(buff, frames*2);
 			libaave->put_audio(sources[i]->aave_source, buff, frames);
         }
     }
@@ -60,6 +58,7 @@ void KFSystem::start_keyframes(int delay) {
     for (unsigned i=0; i<sources.size(); i++) {
         sources[i]->start_keyframes(this, delay);
     }
+    render_state = 1;
 }
 
 int KFSystem::done() {

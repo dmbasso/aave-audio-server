@@ -190,7 +190,6 @@ int render_frames_todriver(int nframes) {
 
     while (nframes--) {
 		sys.render(buff, BUFFLEN);
-		ofs.write((char *) &buff, 2*2*BUFFLEN);
 		alsa.write(buff, BUFFLEN);
 		// recv iterate
     }
