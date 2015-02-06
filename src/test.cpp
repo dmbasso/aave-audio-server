@@ -199,7 +199,7 @@ int render_frames_todriver(int nframes) {
     short buff[BUFFLEN * 2];
 
     Alsa alsa;
-    alsa.setup_default();
+    alsa.setup(44100, 2, 8192);
 
     while (nframes--) {
 		sys.render(buff, BUFFLEN);

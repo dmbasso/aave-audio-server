@@ -38,3 +38,7 @@ cmake_install.cmake
 
 # Unused rep files
 old
+
+# 2dview
+demo
+moc_view.cpp
