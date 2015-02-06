@@ -29,3 +29,12 @@ __pycache__/
 
 # Executable
 sys-server
+
+# CMAKE
+CMakeCache.txt
+CMakeFiles
+Makefile
+cmake_install.cmake
+
+# Unused rep files
+old
