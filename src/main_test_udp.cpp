@@ -3,6 +3,7 @@
 
 #include <stdio.h>
 #include <fcntl.h>
+#include <signal.h>
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
@@ -18,6 +19,13 @@
 
 
 #define PORT 34492
+
+
+void shutdown(int signum) 
+{
+    // exit in response to a SIGTERM signal, flushing stdout/stderr
+    exit(0);
+}
 
 
 int socket_init()
@@ -49,7 +57,9 @@ int socket_init()
 }
 
 
-int main() {
+int main()
+{
+    signal(SIGTERM, shutdown);
 
     int socket = socket_init();
     struct sockaddr_in addr;
