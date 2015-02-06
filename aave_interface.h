@@ -18,6 +18,8 @@ class Libaave {
 		void set_listener_position(float, float, float);
 		float* get_listener_position();
 		void set_listener_orientation(float, float, float);
+		void set_reflection_order(unsigned n);
+		unsigned get_reflection_order();
 		short set_geometry(char *recv_buf, int recv_len);
 		short set_geometry_material(char *recv_buf, int recv_len);
 		void update_geometry();

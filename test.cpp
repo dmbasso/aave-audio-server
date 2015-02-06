@@ -18,89 +18,54 @@ int aave_delay;
 extern "C" {
 
 struct aave* get_aave_engine() {
-
-	if (sys.libaave->aave != NULL)
-		return sys.libaave->aave;
-	return NULL;
+	return sys.get_aave_engine();
 }
 
 struct aave_source* get_aave_source(short id) {
-
-	if (sys.sources.find(id) != sys.sources.end())
-		return sys.sources.at(id)->aave_source;
-	return NULL;
+	return sys.get_aave_source(id);
 }
 
 aave_surface* get_aave_surfaces() {
-	return sys.libaave->aave->surfaces;
+	return sys.get_aave_surfaces();
 }
 
 void set_audio_engine(short ae) {
-
 	sys.set_audio_engine(ae);
 	printf("Using audio engine %d\n",ae);
 }
 
-void set_hrtf (short hrtf) {
-
-	if (hrtf == 1) {
-		aave_hrtf_mit(sys.libaave->aave);
-		aave_delay = -333;
-	}
-	if (hrtf == 2) {
-		aave_hrtf_cipic(sys.libaave->aave);
-		aave_delay = -598;
-	}
-	if (hrtf == 3) {
-		aave_hrtf_listen(sys.libaave->aave);
-		aave_delay = -1124;
-	}
-	if (hrtf == 4) {
-		aave_hrtf_tub(sys.libaave->aave);
-		aave_delay = -2169;
-	}
+short set_hrtf (short hrtf) {
+	return sys.set_aave_hrtf(hrtf);
+	printf("Using hrtf set %d\n",hrtf);
 }
 
 void set_listener_position(float x, float y, float z) {
 	std::cout << "setting listener position: " << x << y << z << endl;
-	sys.libaave->set_listener_position(x,y,z);
+	sys.set_listener_position(x,y,z);
 }
 
 float* get_listener_position() {
-	return sys.libaave->get_listener_position();
+	return sys.get_listener_position();
 }
 
-void set_listener_orientation(float x, float y, float z) {
-
-	sys.libaave->set_listener_orientation(x,y,z);
+void set_listener_orientation(float roll, float pitch, float yaw) {
+	sys.set_listener_orientation(roll, pitch, yaw);
 }
 
 void set_geometry(const char* obj) {
-
-	aave_read_obj(sys.libaave->aave, obj);
+	aave_read_obj(sys.get_aave_engine(), obj);
 }
 
 void set_reflection_order(unsigned n) {
-
-	sys.libaave->aave->reflections = n;
+	sys.set_reflection_order(n);
 }
 
 unsigned get_reflection_order() {
-
-	return sys.libaave->aave->reflections;
+	return sys.get_reflection_order();
 }
 
 void add_source(int id) {
-
-    auto source = new Source;
-
-    if (sys.sources.find(id) == sys.sources.end()) {
-    	printf("adding source: %d\n", id);
-		sys.sources.insert(make_pair(id, source));
-		if (sys.audio_engine == 1)
-			source->init_aave(sys.libaave);
-	}
-	else printf("Source %d already allocated...\n", id);
+	sys.add_source(id);
 }
 
 void set_source_sound(int id, const char* name) {
@@ -109,7 +74,7 @@ void set_source_sound(int id, const char* name) {
     	sys.sources.at(id)->sound = Sound::get_sound(name);
 		printf("loading sound %p %i\n", sys.sources.at(id)->sound, sys.sources.at(id)->sound ? sys.sources.at(id)->sound->length : -1);
     }
-    else printf("Source %d not initialized...\n", id);
+    else printf("source %d not initialized...\n", id);
 }
 
 void set_source_position(int id, float x, float y, float z) {
@@ -163,6 +128,54 @@ void start_keyframes(int delay) {
     }
 }
 
+void source_convert_stereo_to_mono(int source_id) {
+	if (sys.sources.find(source_id) != sys.sources.end())
+		sys.sources.at(source_id)->sound->convert_stereo_to_mono();
+}
+
+void source_write_sound_file(int source_id) {
+	if (sys.sources.find(source_id) != sys.sources.end())
+		sys.sources.at(source_id)->sound->write_sound_file();
+}
+
+void aave_update_engine() {
+	sys.update_aave_geometry();
+}
+
+void init_reverb() {
+	sys.init_aave_reverb();
+}
+
+void set_reverb_rt60(unsigned short rt60) {
+	sys.set_aave_reverb_rt60(rt60);
+}
+
+void set_reverb_area(unsigned short area) {
+	sys.set_aave_reverb_area(area);
+}
+
+void set_reverb_volume(unsigned short volume) {
+	sys.set_aave_reverb_volume(volume);
+	aave_reverb_print_parameters(sys.get_aave_engine(), sys.get_aave_engine()->reverb);
+}
+
+void enable_disable_reverb() {
+	sys.enable_disable_aave_reverb();
+}
+
+void set_gain(float gain) {
+	sys.set_aave_gain(gain);
+}
+
+void increase_gain() {
+	sys.increase_aave_gain();
+}
+
+void decrease_gain() {
+	sys.decrease_aave_gain();
+}
+
+
 void render_frames_tofile(int nframes) {
 
 	int data_size = nframes * BUFFLEN * 2 * 2; //16 bit stereo frames
@@ -194,55 +207,6 @@ int render_frames_todriver(int nframes) {
 		// recv iterate
     }
     return 1;
-}
-
-void source_convert_stereo_to_mono(int source_id) {
-
-	if (sys.sources.find(source_id) != sys.sources.end())
-		sys.sources.at(source_id)->sound->convert_stereo_to_mono();
-}
-
-void source_write_sound_file(int source_id) {
-
-	if (sys.sources.find(source_id) != sys.sources.end())
-		sys.sources.at(source_id)->sound->write_sound_file();
-}
-
-void aave_update_engine() {
-	sys.libaave->update_geometry(); /* updates geometries + sources */
-}
-
-void init_reverb() {
-	sys.libaave->init_reverb();
-}
-
-void set_reverb_rt60(unsigned short rt60) {
-	sys.libaave->set_reverb_rt60(rt60);
-}
-
-void set_reverb_area(unsigned short area) {
-	sys.libaave->set_reverb_area(area);
-}
-
-void set_reverb_volume(unsigned short volume) {
-	sys.libaave->set_reverb_volume(volume);
-	aave_reverb_print_parameters(sys.libaave->aave, sys.libaave->aave->reverb);
-}
-
-void enable_disable_reverb() {
-	sys.libaave->enable_disable_reverb();
-}
-
-void set_gain(float gain) {
-	sys.libaave->set_gain(gain);
-}
-
-void increase_gain() {
-	sys.libaave->increase_gain();
-}
-
-void decrease_gain() {
-	sys.libaave->decrease_gain();
 }
 
 } // extern "C"

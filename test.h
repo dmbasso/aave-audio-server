@@ -11,7 +11,7 @@ extern "C" {
 // AAVE only commands
 struct aave* get_aave_engine();
 struct aave_source* get_aave_source(short id);
-void set_hrtf (short hrtf);
+short set_hrtf (short hrtf);
 void set_source_position(int id, float x, float y, float z);
 float* get_source_position(int id);
 void set_listener_position(float x, float y, float z);

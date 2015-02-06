@@ -43,6 +43,14 @@ void Libaave::set_listener_orientation(float x, float y, float z) {
 	aave_set_listener_orientation(aave, x, y, z);
 }
 
+void Libaave::set_reflection_order(unsigned n) {
+	aave->reflections = n;
+}
+
+unsigned Libaave::get_reflection_order() {
+	return aave->reflections;
+}
+
 short Libaave::set_geometry(char *recv_buf, int recv_len) {
 
 	float vertices[MAX_VERTICES][3];

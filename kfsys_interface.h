@@ -59,13 +59,31 @@ class KFSystem {
 		short audio_engine; //0 = direct, 1 = aave
 		int write_frames;
     	uint64_t global_position;
-    	int64_t delay;
-    	short render_state;
+    	int32_t delay;
     	
     	KFSystem();
     	void render(short *buff, int bufflen);
     	void start_keyframes(int delay);
 		void set_audio_engine(short ae);
+		struct aave* get_aave_engine();
+		struct aave_surface* get_aave_surfaces();
+		short set_aave_hrtf(short hrtf);
+		void set_listener_position(float x, float y, float z);
+		void set_listener_orientation(float roll, float pitch, float yaw);
+		float* get_listener_position();
+		void set_reflection_order(unsigned n);
+		unsigned get_reflection_order();
+		void update_aave_geometry();
+		void init_aave_reverb();
+		void set_aave_reverb_rt60(unsigned short rt60);
+		void set_aave_reverb_area(unsigned short area);
+		void set_aave_reverb_volume(unsigned short volume);
+		void enable_disable_aave_reverb();
+		void set_aave_gain(float gain);
+		void increase_aave_gain();
+		void decrease_aave_gain();
+		void add_source(int id);
+		struct aave_source* get_aave_source(short id);
     	int done();
     	
     	void handle_datagram(char *, int);
@@ -76,7 +94,7 @@ class KFSystem {
     	short cmds_output_iterate(char *, int);
     	short cmds_output_set_frame(char *, int);
 		short cmds_output_write_frames(char *, int);
-    	short add_source(char *, int);
+    	short cmds_add_source(char *, int);
     	short remove_source(char *, int);
     	short clear_sources(char *, int);
 };

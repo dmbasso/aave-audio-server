@@ -9,10 +9,12 @@
 #include <sys/time.h>
 #include <arpa/inet.h>
 #include <sys/socket.h>
+#include <ctime>
 
 #include "kfsys_interface.h"
 #include "aave_interface.h"
 #include "alsa_interface.h"
+#include "test.h"
 
 
 #define PORT 34492
@@ -29,7 +31,8 @@ int socket_init()
         printf("socket");
         exit(1);
     }
-
+    
+    /* non-blocking recv */ 
     fcntl(s, F_SETFL, fcntl(s, F_GETFL) | O_NONBLOCK);
 
     memset(&addr, 0, sizeof(addr));     
@@ -46,7 +49,7 @@ int socket_init()
 }
 
 
-int main() {//_latency_check() {
+int main() {
 
     int socket = socket_init();
     struct sockaddr_in addr;
@@ -57,6 +60,8 @@ int main() {//_latency_check() {
 
     KFSystem sys;    
     Alsa alsa;
+    
+    struct timeval t1, t2;
 
     alsa.setup(44100, 2, 8192);
     int alsa_bufflen = alsa.avail();
@@ -75,9 +80,10 @@ int main() {//_latency_check() {
 	//delay += -1124; //listen
 	//delay += -2169; //tub
 	
-	sys.libaave->set_gain(5);
+	// aave params not included in the comunication protocol
+	// set_gain(8);
+	// get_aave_engine()->reverb->level = 0.3;
 
-    FILE *out = fopen("../sounds/output/out_udp.raw", "wb");
     //int first_packet = 0;
 
     printf("waiting for udp packet at port %i\n", PORT);
@@ -86,13 +92,26 @@ int main() {//_latency_check() {
 
         recv_len = recvfrom(socket, recv_buff, 8192, 0, (struct sockaddr*) &addr, &slen);
         
-        if (recv_len > 0)        	
+        //gettimeofday(&t1, NULL);
+        
+        if (recv_len > 0) {
         	sys.handle_datagram(recv_buff, recv_len);
-        	
-        if (sys.render_state) {
-        	sys.render(buff, BUFFLEN);
-        	alsa.write(buff, BUFFLEN);
-        }        
+        }
+        
+        avail = alsa.avail();
+        
+        if (avail > BUFFLEN) {        
+            sys.render(buff, BUFFLEN);
+            alsa.write(buff, BUFFLEN);
+        }
+        
+        //gettimeofday(&t2, NULL);
+        
+        //int elapsed = (t2.tv_sec - t1.tv_sec) * 1000 + (t2.tv_usec - t1.tv_usec)/1000;
+        //if (elapsed > 1)
+        //    printf("\nprocess datagram in %d msecs\n", elapsed);
+        
+        
     }
     alsa.shutdown();
 }

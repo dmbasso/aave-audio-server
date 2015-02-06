@@ -36,6 +36,7 @@ void Source::start_keyframes(KFSystem *sys, int delay) {
     keyframe_start_position = sys->global_position + delay;
     keyframe_active = 1;
     current_keyframe = -1;
+    sample_position = -1;
 }
 
 void Source::render(uint64_t global_position, short *buff, int frames) {
