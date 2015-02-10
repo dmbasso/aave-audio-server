@@ -25,7 +25,7 @@ def srv(request):
         A server for single tests, so we can check its output.
     """
     proc = subprocess.Popen(
-        "./sys-server", stdout=subprocess.PIPE, stderr=subprocess.STDOUT
+        "./aave-audio-server", stdout=subprocess.PIPE, stderr=subprocess.STDOUT
     )
     time.sleep(.1)
     return proc
@@ -47,7 +47,7 @@ def srv4all(request):
         A server that is supposed to be kept running during all the tests.
     """
     proc = subprocess.Popen(
-        "./sys-server", stdout=subprocess.PIPE, stderr=subprocess.STDOUT
+        "./aave-audio-server", stdout=subprocess.PIPE, stderr=subprocess.STDOUT
     )
 
     def finalizer():

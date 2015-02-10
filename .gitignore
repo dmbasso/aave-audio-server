@@ -28,7 +28,7 @@ __pycache__/
 *~
 
 # Executable
-sys-server
+aave-audio-server
 
 # CMAKE
 CMakeCache.txt
