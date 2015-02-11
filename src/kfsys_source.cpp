@@ -187,9 +187,10 @@ short Source::handle_add_keyframe(char *recv_buf, int recv_len) {
 
 	Keyframe kf;
 	float kf_pos[3];
-	short retv = 4 + 4; // cmds + frame
+	short retv = 4 + 4; // cmds + time
 	
 	kf.flags = recv_buf[3];
+	// convert time from milliseconds to audio frames at 44.1KHz
 	kf.start = ntohl(*(long*)(recv_buf + 4)) * 44100 / 1000;
 	
 	if (kf.flags & 2) {

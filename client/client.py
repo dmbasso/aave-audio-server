@@ -140,12 +140,15 @@ class AudioPacket:
         self.cmds_list.append(pack("!BBB", self.cmds.source,
                                    self.source_cmds.clear_keyframes, source))
 
-    def add_keyframe(self, source, frame, play=True, pos=None, sound=None):
+    def add_keyframe(self, source, time, play=True, pos=None, sound=None):
+        """
+            Add a keyframe to the source at the specified time in milliseconds.
+        """
         flags = (1 if play is not None else 0)
         flags |= (2 if pos is not None else 0)
         flags |= (4 if sound is not None else 0)
         cmd = pack("!BBBBI", self.cmds.source, self.source_cmds.add_keyframe,
-                   source, flags, frame)
+                   source, flags, time)
         if pos is not None:
             cmd += pack("!fff", *pos)
         if sound is not None:
