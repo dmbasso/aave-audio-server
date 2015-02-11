@@ -77,9 +77,8 @@ void Source::render(uint64_t global_position, short *buff, int frames) {
             for (i=in_buff_pos; i<remaining; i++) {
                 if (sound->channels == 1) {
                     short sample = sound->samples[sample_position + i - in_buff_pos]; 
-                    //buff[i * 2] += sample;
-                    //buff[i * 2 + 1] += sample;
-                    buff[i] = sample;
+                    buff[i * 2] += sample;
+                    buff[i * 2 + 1] += sample;
                 } else {
                     buff[i * 2] += sound->samples[(sample_position + i - in_buff_pos) * 2]; 
                     buff[i * 2 + 1] += sound->samples[(sample_position + i - in_buff_pos) * 2 + 1]; 

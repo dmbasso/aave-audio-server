@@ -163,7 +163,11 @@ void KFSystem::render(short *buff, int frames) {
 			sources[i]->render(global_position, buff, frames);
         if (audio_engine == 1) {
 			sources[i]->render(global_position, buff, frames);
+			for (unsigned j=0; j<frames; j++) {
+			    buff[j] = ((int)buff[j * 2] + buff[j * 2 + 1]) >> 2;
+			}
 			libaave->put_audio(sources[i]->aave_source, buff, frames);
+            memset(buff, 0, 2 * frames * sizeof(short));
         }
     }
 
