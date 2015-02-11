@@ -25,6 +25,8 @@ KFSystem::KFSystem() {
     write_frames = -1;
 	global_position = 0;
 	delay = 0;
+    mode = processing_modes::realtime;
+    started = false;
 }
 
 struct aave* KFSystem::get_aave_engine() {	
@@ -192,11 +194,6 @@ int KFSystem::done() {
     return 1;
 }
 
-short KFSystem::cmds_output_iterate(char *recvbuf, int recv_len) {
-	
-	return 2;
-}
-
 short KFSystem::cmds_output_set_frame(char *recv_buf, int recv_len) {
 
     //hack
@@ -216,8 +213,38 @@ short KFSystem::cmds_output_write_frames(char *recv_buf, int recv_len) {
 
 	int nframes = ntohl(*(int32_t*)(recv_buf + 2)); // ignore it
 	write_frames = nframes;
-    printf("write %d frames\n", nframes);
+
+    printf("%d frames to be written\n", nframes);
     return 6;
+}
+
+short KFSystem::cmds_output_iterate(char *recvbuf, int recv_len) {
+    #ifndef BUFFLEN
+        #define BUFFLEN 2048
+    #endif
+    int nframes = write_frames;
+
+    #define BUFFSIZE (BUFFLEN * 2 * 2)  // memory size of the buffer in bytes
+	int data_size = nframes * BUFFSIZE; // 16 bit stereo frames
+    short buff[BUFFLEN * 2];
+    memset(buff, 0, BUFFLEN * 2);
+
+    std::ofstream ofs;
+
+    // TODO the output path must be a parameter, not be hardcoded
+    ofs.open(("output.wav"), std::ofstream::out);
+    init_output_wavfile(&ofs, data_size);
+
+    while (nframes + BUFFLEN > 0) {
+		render(buff, BUFFLEN);
+		ofs.write((char *) &buff, BUFFSIZE > nframes ? nframes : BUFFSIZE);
+		nframes -= BUFFLEN;
+		// recv iterate
+    }
+    ofs.close();
+    printf("%d frames written to %s\n", write_frames, "output.wav"); // TODO
+
+	return 2;
 }
 
 short KFSystem::cmds_listener_set_position(char *recv_buf, int recv_len) {
@@ -235,6 +262,7 @@ short KFSystem::handle_input_params_cmds(char *recv_buf, int recv_len) {
 		case input_params_cmds::mode:
 			temp = ntohs(*(short*)(recv_buf + 2));
 			printf("mode = %d\n",temp);
+			started = true;
 			break;
 		case input_params_cmds::hrtf:
 			temp = ntohs(*(short*)(recv_buf + 2));

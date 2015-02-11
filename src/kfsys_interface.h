@@ -51,6 +51,12 @@ enum class geometry_cmds {
     set_material = 3
 };
 
+enum class processing_modes {
+    realtime = 0,
+    iterative = 1
+};
+
+
 class KFSystem {
 
 	public:
@@ -58,6 +64,8 @@ class KFSystem {
     	map<short, Source *> sources;
 		short audio_engine; //0 = direct, 1 = aave
 		int write_frames;
+        processing_modes mode;
+        bool started;
     	uint64_t global_position;
     	int32_t delay;
     	

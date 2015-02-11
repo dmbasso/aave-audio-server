@@ -108,6 +108,11 @@ int main()
         	sys.handle_datagram(recv_buff, recv_len);
         }
         
+        if (!sys.started || sys.mode == processing_modes::iterative) {
+            usleep(10000);
+            continue;
+        }
+
         avail = alsa.avail();
         
         if (avail > BUFFLEN) {        
