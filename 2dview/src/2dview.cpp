@@ -1,8 +1,8 @@
 /** To play the output .raw file using aplay run:
   * $aplay -t raw -c 2 -f cd -r 44100 output.raw */
 
-#include "../src/test.h"
-#include "../src/kfsys_interface.h"
+#include "../../src/test.h"
+#include "../../src/kfsys_interface.h"
 #include "view.h"
 
 #include <thread>
@@ -12,13 +12,13 @@
 
 #include <QApplication>
 
-#define NSOURCES 2
+#define NSOURCES 9
 
 using namespace std;
 
 int main(int argc, char **argv) {
 
-	string sound_file_path("../../sounds/input/");
+	string sound_file_path("../sounds/input/");
 	const char *sounds[] = {"cello", "clarinet","double_bass", "flute", "harp", "oboe", "percussion", "trombone", "violin"};
 	vector<string> sound_files(sounds, sounds + NSOURCES);
 	string file_type(".wav");
@@ -52,7 +52,7 @@ int main(int argc, char **argv) {
 	set_hrtf(3);
 	set_listener_position(0., -15., 1.);
 	set_listener_orientation(0., 0., -M_PI/2);
-	set_geometry("../../geometries/model.obj");
+	set_geometry("../geometries/model.obj");
 	set_reflection_order(1);
 	init_reverb();
 	set_reverb_rt60(2000);

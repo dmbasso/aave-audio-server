@@ -39,6 +39,12 @@ cmake_install.cmake
 # Unused rep files
 old
 
-# 2dview
-demo
+# QT5 moc files
+*automoc*
 moc_view.cpp
+
+# 2dview files
+2d_view
+
+# boost test files
+boost_test

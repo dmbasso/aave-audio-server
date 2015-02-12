@@ -12,9 +12,9 @@
 #include <math.h> /* M_PI */
 
 #include "view.h"
-#include "../src/test.h"
+#include "../../src/test.h"
 
-#define NSOURCES 2
+#define NSOURCES 9
 
 View::View()
 	: QWidget()
@@ -218,7 +218,7 @@ void View::paintEvent(QPaintEvent *event)
 {
 	int x, y;
 
-	string image_file_path("../../images/");
+	string image_file_path("../images/");
 	const char *images[] = {"cello", "clarinet","double_bass", "flute", "harp", "oboe", "percussion", "trombone", "violin"};
 	vector<string> image_files(images, images + NSOURCES);
 	string file_type(".png");
@@ -279,7 +279,7 @@ void View::paintEvent(QPaintEvent *event)
 	}
 
 	/* Draw listener. */
-	static const QImage listenerImage("../../images/listener.png");
+	static const QImage listenerImage("../images/listener.png");
 	QTransform transform;
 	transform.rotate(yaw * (180 / M_PI));
 	QImage image = listenerImage.transformed(transform,	Qt::SmoothTransformation);
