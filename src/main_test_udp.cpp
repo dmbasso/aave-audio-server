@@ -13,10 +13,7 @@
 #include <ctime>
 
 #include "kfsys_interface.h"
-#include "aave_interface.h"
 #include "alsa_interface.h"
-#include "test.h"
-
 
 #define PORT 34492
 

@@ -3,7 +3,9 @@
 
 #include <map>
 
-#include "aave_interface.h"
+#ifdef WITH_AAVE
+    #include "aave_interface.h"
+#endif
 #include "kfsys_source.h"
 
 #define SAMPLERATE 44100
@@ -60,7 +62,9 @@ enum class processing_modes {
 class KFSystem {
 
 	public:
-	    static Libaave *libaave;
+    	#ifdef WITH_AAVE
+    	    static Libaave *libaave;
+	    #endif
     	map<short, Source *> sources;
 		short audio_engine; //0 = direct, 1 = aave
 		int write_frames;
@@ -73,8 +77,10 @@ class KFSystem {
     	void render(short *buff, int bufflen);
     	void start_keyframes(int delay);
 		void set_audio_engine(short ae);
-		struct aave* get_aave_engine();
-		struct aave_surface* get_aave_surfaces();
+		#ifdef WITH_AAVE
+		    struct aave* get_aave_engine();
+		    struct aave_surface* get_aave_surfaces();
+		#endif
 		short set_aave_hrtf(short hrtf);
 		void set_listener_position(float x, float y, float z);
 		void set_listener_orientation(float roll, float pitch, float yaw);
@@ -91,7 +97,9 @@ class KFSystem {
 		void increase_aave_gain();
 		void decrease_aave_gain();
 		void add_source(int id);
-		struct aave_source* get_aave_source(short id);
+		#ifdef WITH_AAVE
+    		struct aave_source* get_aave_source(short id);
+		#endif
     	int done();
     	
     	void handle_datagram(char *, int);

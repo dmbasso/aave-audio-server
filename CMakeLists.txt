@@ -2,38 +2,38 @@ cmake_minimum_required(VERSION 2.8)
 
 PROJECT(aave-audio-server)
 
-SET(SERVER OFF)
-SET(2DVIEW ON)
-SET(PYTEST OFF)
-SET(BOOST_TEST OFF)
+OPTION(SERVER "AcousticAVE Audio Server" ON)
+OPTION(2DVIEW "2D Audio Visualizer" OFF)
+OPTION(BOOST_TEST "Boost Test" OFF)
+OPTION(WITH_AAVE "Link against libaave" ON)
 
-IF(PYTEST)
-	SET(SERVER ON)
-	SET(PYTHON_TEST_DIR /tests)
 
-	macro(add_python_target tgt)
-	  foreach(file ${ARGN})
-		set(OUT ${CMAKE_CURRENT_BINARY_DIR}/${file}.pyo)
-		list(APPEND OUT_FILES ${OUT})
-		add_custom_command(OUTPUT ${OUT} COMMAND py.test -xv tests)
-	  endforeach()
-
-	  add_custom_target(${tgt} ALL DEPENDS ${OUT_FILES})
-	endmacro()
-
-	add_python_target(tests ${PYTHON_TEST_DIR}/test_server.py)
-ENDIF(PYTEST)
+ADD_CUSTOM_TARGET(tests py.test -xv tests
+		  DEPENDS aave-audio-server)
 
 if(SERVER)
-	SET(SOURCES src/kfsys_interface.cpp src/alsa_interface.cpp src/aave_interface.cpp src/test.cpp src/kfsys_sound.cpp src/kfsys_source.cpp src/test.cpp src/util.cpp src/main_test_udp.cpp)
 
-	FIND_LIBRARY(AAVE_LIBRARY libaave.a "../libaave")
+	IF(WITH_AAVE)
+		ADD_DEFINITIONS(-DWITH_AAVE)
+		SET(SOURCES src/kfsys_interface.cpp src/alsa_interface.cpp
+			src/aave_interface.cpp src/kfsys_sound.cpp
+			src/kfsys_source.cpp src/util.cpp
+			src/main_test_udp.cpp)
+		FIND_LIBRARY(AAVE_LIBRARY libaave.a "../libaave")
+		ADD_EXECUTABLE(aave-audio-server ${SOURCES})
+		TARGET_LINK_LIBRARIES(aave-audio-server asound ${AAVE_LIBRARY})
+	ELSE()
+		SET(SOURCES src/kfsys_interface.cpp src/alsa_interface.cpp
+			src/kfsys_sound.cpp
+			src/kfsys_source.cpp src/util.cpp
+			src/main_test_udp.cpp)
+		ADD_EXECUTABLE(aave-audio-server ${SOURCES})
+		TARGET_LINK_LIBRARIES(aave-audio-server asound)
+	ENDIF()
 
 	SET(GCC_COMPILE_FLAGS "-std=c++11 -ggdb -O2")
 	SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${GCC_COMPILE_FLAGS}")
 
-	ADD_EXECUTABLE(aave-audio-server ${SOURCES})
-	TARGET_LINK_LIBRARIES(aave-audio-server asound ${AAVE_LIBRARY})
 endif(SERVER)
 
 if(2DVIEW)

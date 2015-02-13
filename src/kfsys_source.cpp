@@ -11,7 +11,9 @@ inline float unpack_fl (char* buf) {
 }
 
 Source::Source() {
-	aave_source = NULL;
+    #ifdef WITH_AAVE
+    	aave_source = NULL;
+	#endif
     sound = NULL;
     keyframe_active = 0;
     sample_position = -1;
@@ -117,25 +119,27 @@ void Source::render(uint64_t global_position, short *buff, int frames) {
     }
 }
 
+#ifdef WITH_AAVE
 void Source::init_aave(Libaave *libaave) {
 
 	aave_source = (struct aave_source *) malloc(sizeof (struct aave_source));
 	aave_init_source(libaave->aave, aave_source);
 	aave_add_source(libaave->aave, aave_source);
 }
+#endif
 
 void Source::set_position(float x, float y, float z) {
-
-	aave_set_source_position(this->aave_source, x, y, z);
+    #ifdef WITH_AAVE
+    	aave_set_source_position(this->aave_source, x, y, z);
+	#endif
 }
 
-float* Source::get_position() {
-
-	float* pos = (float*) malloc(sizeof(float) * 3);
+void Source::get_position(float* pos) {
+    #ifdef WITH_AAVE
 	pos[0] = this->aave_source->position[0];
 	pos[1] = this->aave_source->position[1];
 	pos[2] = this->aave_source->position[2];
-	return pos;
+	#endif
 }
 
 short Source::handle_datagram(char *recv_buf, int recv_len) {

@@ -3,7 +3,10 @@
 
 #include <vector>
 
-#include "aave_interface.h"
+
+#ifdef WITH_AAVE
+    #include "aave_interface.h"
+#endif
 #include "kfsys_sound.h"
 #include "kfsys_keyframe.h"
 
@@ -22,7 +25,9 @@ class KFSystem;
 class Source {
 
 	public:
-		struct aave_source *aave_source;
+        #ifdef WITH_AAVE
+    		struct aave_source *aave_source;
+		#endif
 		Sound *sound; //map
 		vector<Keyframe> keyframes;
 		int loop;
@@ -38,9 +43,11 @@ class Source {
 		void start_keyframes(KFSystem *sys, int delay);
 		void render(uint64_t global_position, short *buff, int bufflen);
 		
-		void init_aave(Libaave *libaave);
+		#ifdef WITH_AAVE
+            void init_aave(Libaave *libaave);
+        #endif
 		void set_position(float, float, float);
-		float* get_position();
+		void get_position(float*);
 
     	short handle_datagram(char *, int);
     	short handle_add_keyframe(char *, int);
