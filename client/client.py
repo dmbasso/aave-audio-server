@@ -82,6 +82,7 @@ class AudioPacket:
         cipic = 2
         listen = 3
         tub = 4
+        identity = 5
 
     class output_cmds:
         iterate = 0

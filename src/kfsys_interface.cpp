@@ -72,6 +72,9 @@ short KFSystem::set_aave_hrtf(short hrtf) {
 		aave_hrtf_tub(get_aave_engine());
 		aave_delay = -2169;
 	}
+    if (hrtf == 5) {
+        aave_hrtf_identity(get_aave_engine());
+    }
 	return hrtf;
 #endif
 }
