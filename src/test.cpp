@@ -85,12 +85,12 @@ void set_source_position(int id, float x, float y, float z) {
     }
 }
 
-float* get_source_position(int id) {
+void get_source_position(int id, float *pos) {
 
 	if (sys.sources.find(id) != sys.sources.end() && sys.audio_engine == 1)
-		return sys.sources.at(id)->get_position();
+		sys.sources.at(id)->get_position(pos);
     else
-		return NULL;
+		printf("get source position: source not initialized...\n");
 }
 
 void source_start_sound(int id) {
@@ -199,8 +199,9 @@ int render_frames_todriver(int nframes) {
     short buff[BUFFLEN * 2];
 
     Alsa alsa;
-    alsa.setup(44100, 2, 8192);
-
+    //alsa.setup(44100, 2, 8192);
+	alsa.setup_default();
+	
     while (nframes--) {
 		sys.render(buff, BUFFLEN);
 		alsa.write(buff, BUFFLEN);

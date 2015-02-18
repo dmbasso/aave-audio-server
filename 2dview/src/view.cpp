@@ -161,6 +161,7 @@ void View::keyPressEvent(QKeyEvent *event)
 void View::mouseMoveEvent(QMouseEvent *event)
 {
 	float x, y, z, zscale;
+	float pos[3];
 
 	if (selectedItem==-2)
 		return;
@@ -173,7 +174,7 @@ void View::mouseMoveEvent(QMouseEvent *event)
 		y = y0 - (event->y() - y0p) / zscale;
 		set_listener_position(x, y, z);
 	} else {
-		float* pos = get_source_position(selectedItem);
+		get_source_position(selectedItem, pos);
 		z = pos[2];
 		zscale = (1 + (z - zmin) / (zmax - zmin) * 0.3) * scale;
 		x = x0 + (event->x() - x0p) / zscale;
@@ -188,6 +189,7 @@ void View::mouseMoveEvent(QMouseEvent *event)
 void View::mousePressEvent(QMouseEvent *event)
 {
 	int x, y, dx, dy;
+	float pos[3];
 
 	/* See if the selected itemr is the listener. */
 	convert(get_listener_position(), &x, &y);
@@ -200,7 +202,8 @@ void View::mousePressEvent(QMouseEvent *event)
 
 	/* See if the selected item is any of the sound sources. */
 	for (short i = 0; i < NSOURCES; i++) {
-		convert(get_source_position(i), &x, &y);
+		get_source_position(i, pos);
+		convert(pos, &x, &y);
 		dx = event->x() - x;
 		dy = event->y() - y;
 		if (dx * dx + dy * dy < 32) {
@@ -217,6 +220,7 @@ void View::mousePressEvent(QMouseEvent *event)
 void View::paintEvent(QPaintEvent *event)
 {
 	int x, y;
+	float pos[3];
 
 	string image_file_path("../images/");
 	const char *images[] = {"cello", "clarinet","double_bass", "flute", "harp", "oboe", "percussion", "trombone", "violin"};
@@ -272,7 +276,8 @@ void View::paintEvent(QPaintEvent *event)
 	for (int i = 0; i < NSOURCES; i++) {
 		string img_file_path = image_file_path + image_files.at(i) + file_type;
 		const QPixmap sourcePixmap(img_file_path.c_str());
-		convert(get_source_position(i), &x, &y);
+		get_source_position(i, pos);
+		convert(pos, &x, &y);
 		x -= sourcePixmap.width() / 2;
 		y -= sourcePixmap.height() / 2;
 		painter.drawPixmap(x, y, sourcePixmap);

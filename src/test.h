@@ -13,7 +13,7 @@ struct aave* get_aave_engine();
 struct aave_source* get_aave_source(short id);
 short set_hrtf (short hrtf);
 void set_source_position(int id, float x, float y, float z);
-float* get_source_position(int id);
+void get_source_position(int id, float*);
 void set_listener_position(float x, float y, float z);
 float* get_listener_position();
 void set_listener_orientation(float x, float y, float z);
