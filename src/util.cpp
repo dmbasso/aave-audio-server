@@ -44,7 +44,8 @@ void init_output_wavfile(ofstream *ofs, int data_size) {
 }
 
 void buffer_stereo_to_mono(short *buff, int len) {
-	for (int i=0; i<len; i++)
-		if (!(i%2)) buff[i/2] = buff[i];
+	for (int i=0; i<len; i+=2) {
+		buff[i/2] = (short)(((int)buff[i] + buff[i + 1]) / 2);
+	}
 }
 
