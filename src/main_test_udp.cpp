@@ -70,9 +70,7 @@ int main()
     
     struct timeval t1, t2;
 
-    alsa.setup(44100, 2, 8192);
-    int alsa_bufflen = alsa.avail();
-    printf("bufflen: %i\n", alsa_bufflen);
+    int alsa_bufflen;
 
 //	alsa.setup_default();   
     
@@ -108,6 +106,11 @@ int main()
         if (!sys.started || sys.mode == processing_modes::iterative) {
             usleep(10000);
             continue;
+        }
+        if (!alsa) {
+            alsa.setup(44100, 2, 8192);
+            int alsa_bufflen = alsa.avail();
+            printf("bufflen: %i\n", alsa_bufflen);
         }
 
         avail = alsa.avail();
