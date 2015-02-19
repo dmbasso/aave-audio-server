@@ -16,6 +16,7 @@
 #include "alsa_interface.h"
 
 #define PORT 34492
+#define WITH_PULSEAUDIO 0
 
 
 void shutdown(int signum) 
@@ -36,7 +37,7 @@ int socket_init()
         printf("socket");
         exit(1);
     }
-    
+
     /* non-blocking recv */ 
     fcntl(s, F_SETFL, fcntl(s, F_GETFL) | O_NONBLOCK);
 
@@ -44,7 +45,7 @@ int socket_init()
     addr.sin_family = AF_INET;
     addr.sin_port = htons(PORT);
     addr.sin_addr.s_addr = htonl(INADDR_ANY);
-     
+
     /* Bind socket to port. */
     if (bind(s, (struct sockaddr*) &addr, sizeof(addr)) == -1) {
         printf("bind");
@@ -68,13 +69,12 @@ int main()
     KFSystem sys;    
     Alsa alsa;
     
-    struct timeval t1, t2;
-
-    alsa.setup(44100, 2, 8192);
-    int alsa_bufflen = alsa.avail();
-    printf("bufflen: %i\n", alsa_bufflen);
-
-//	alsa.setup_default();   
+    if (WITH_PULSEAUDIO) {
+		alsa.setup(44100, 2, 8192);
+		int alsa_bufflen = alsa.avail();
+		printf("bufflen: %i\n", alsa_bufflen);
+	} else
+		alsa.setup_default();
     
     int recv_len, avail;
     char *recv_buff;
@@ -86,10 +86,6 @@ int main()
 	//delay += -598;  //cipic
 	//delay += -1124; //listen
 	//delay += -2169; //tub
-	
-	// aave params not included in the comunication protocol
-	// set_gain(8);
-	// get_aave_engine()->reverb->level = 0.3;
 
     //int first_packet = 0;
 
@@ -98,32 +94,26 @@ int main()
     while (1) {
 
         recv_len = recvfrom(socket, recv_buff, 8192, 0, (struct sockaddr*) &addr, &slen);
-        
-        //gettimeofday(&t1, NULL);
-        
+
         if (recv_len > 0) {
         	sys.handle_datagram(recv_buff, recv_len);
         }
-        
+
         if (!sys.started || sys.mode == processing_modes::iterative) {
             usleep(10000);
             continue;
         }
 
-        avail = alsa.avail();
-        
-        if (avail > BUFFLEN) {        
+        if (WITH_PULSEAUDIO) {
+		    avail = alsa.avail();
+		    if (avail > BUFFLEN) {
+		        sys.render(buff, BUFFLEN);
+		        alsa.write(buff, BUFFLEN);
+		    }
+        } else {
             sys.render(buff, BUFFLEN);
             alsa.write(buff, BUFFLEN);
         }
-        
-        //gettimeofday(&t2, NULL);
-        
-        //int elapsed = (t2.tv_sec - t1.tv_sec) * 1000 + (t2.tv_usec - t1.tv_usec)/1000;
-        //if (elapsed > 1)
-        //    printf("\nprocess datagram in %d msecs\n", elapsed);
-        
-        
     }
     alsa.shutdown();
 }

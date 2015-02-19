@@ -15,7 +15,7 @@ void Alsa::setup_default() {
 	}
 	err = snd_pcm_set_params(alsa_handle, SND_PCM_FORMAT_S16,
 				SND_PCM_ACCESS_RW_INTERLEAVED,
-				2, 44100, 0, 100000); /* 100ms latency */
+				2, 44100, 0, 400000); /* 400ms latency */
 	if (err < 0) {
 		fprintf(stderr, "snd_pcm_set_params: %s\n", snd_strerror(err));
 		return;
