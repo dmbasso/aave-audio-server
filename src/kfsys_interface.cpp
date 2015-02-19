@@ -246,7 +246,7 @@ int KFSystem::done() {
 }
 
 short KFSystem::cmds_output_set_frame(char *recv_buf, int recv_len) {
-    
+
 	//int start_frame = ntohl(*(long*)(recv_buf + 2)); // ignore it
     delay = ntohl(*(long*)(recv_buf + 6));
     start_keyframes(delay);
@@ -272,7 +272,6 @@ short KFSystem::cmds_output_iterate(char *recvbuf, int recv_len) {
     int nframes = write_frames;
 
     #define BUFFSIZE (BUFFLEN * 2 * 2)  // memory size of the buffer in bytes
-	int data_size = nframes * BUFFSIZE; // 16 bit stereo frames
     short buff[BUFFLEN * 2];
     memset(buff, 0, BUFFLEN * 2);
 
@@ -280,11 +279,11 @@ short KFSystem::cmds_output_iterate(char *recvbuf, int recv_len) {
 
     // TODO the output path must be a parameter, not be hardcoded
     ofs.open(("output.wav"), std::ofstream::out);
-    init_output_wavfile(&ofs, data_size);
+    init_output_wavfile(&ofs, nframes * 4);
 
     while (nframes + BUFFLEN > 0) {
 		render(buff, BUFFLEN);
-		ofs.write((char *) &buff, BUFFSIZE > nframes ? nframes : BUFFSIZE);
+		ofs.write((char *) &buff, 4 * (BUFFLEN > nframes ? nframes : BUFFLEN));
 		nframes -= BUFFLEN;
 		// recv iterate
     }

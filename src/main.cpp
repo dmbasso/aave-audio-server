@@ -68,14 +68,14 @@ int main()
 
     KFSystem sys;    
     Alsa alsa;
-    
+
     if (WITH_PULSEAUDIO) {
 		alsa.setup(44100, 2, 8192);
 		int alsa_bufflen = alsa.avail();
 		printf("bufflen: %i\n", alsa_bufflen);
 	} else
 		alsa.setup_default();
-    
+
     int recv_len, avail;
     char *recv_buff;
     recv_buff = (char *) malloc(8192);
@@ -102,6 +102,11 @@ int main()
         if (!sys.started || sys.mode == processing_modes::iterative) {
             usleep(10000);
             continue;
+        }
+        if (!alsa) {
+            alsa.setup(44100, 2, 8192);
+            int alsa_bufflen = alsa.avail();
+            printf("bufflen: %i\n", alsa_bufflen);
         }
 
         if (WITH_PULSEAUDIO) {
