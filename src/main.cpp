@@ -16,7 +16,6 @@
 #include "alsa_interface.h"
 
 #define PORT 34492
-#define WITH_PULSEAUDIO 0
 
 
 void shutdown(int signum) 
@@ -57,6 +56,9 @@ int socket_init()
 
 int main()
 {
+    // check if pulseaudio is running
+    bool pulseaudio = system("ps ax | grep [p]ulseaudio >/dev/null") == 0;
+
     signal(SIGTERM, shutdown);
 
     int socket = socket_init();
@@ -68,13 +70,6 @@ int main()
 
     KFSystem sys;    
     Alsa alsa;
-
-    if (WITH_PULSEAUDIO) {
-		alsa.setup(44100, 2, 8192);
-		int alsa_bufflen = alsa.avail();
-		printf("bufflen: %i\n", alsa_bufflen);
-	} else
-		alsa.setup_default();
 
     int recv_len, avail;
     char *recv_buff;
@@ -96,7 +91,8 @@ int main()
         recv_len = recvfrom(socket, recv_buff, 8192, 0, (struct sockaddr*) &addr, &slen);
 
         if (recv_len > 0) {
-        	sys.handle_datagram(recv_buff, recv_len);
+            sys.handle_datagram(recv_buff, recv_len);
+            continue;
         }
 
         if (!sys.started || sys.mode == processing_modes::iterative) {
@@ -104,20 +100,24 @@ int main()
             continue;
         }
         if (!alsa) {
-            alsa.setup(44100, 2, 8192);
-            int alsa_bufflen = alsa.avail();
-            printf("bufflen: %i\n", alsa_bufflen);
+           if (pulseaudio) {
+		        alsa.setup_default();
+	        } else {
+		        alsa.setup(44100, 2, 8192);
+		        int alsa_bufflen = alsa.avail();
+		        printf("bufflen: %i\n", alsa_bufflen);
+	        }
         }
 
-        if (WITH_PULSEAUDIO) {
+        if (pulseaudio) {
+            sys.render(buff, BUFFLEN);
+            alsa.write(buff, BUFFLEN);
+        } else {
 		    avail = alsa.avail();
 		    if (avail > BUFFLEN) {
 		        sys.render(buff, BUFFLEN);
 		        alsa.write(buff, BUFFLEN);
 		    }
-        } else {
-            sys.render(buff, BUFFLEN);
-            alsa.write(buff, BUFFLEN);
         }
     }
     alsa.shutdown();
