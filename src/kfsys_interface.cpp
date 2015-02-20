@@ -247,14 +247,6 @@ int KFSystem::done() {
 
 short KFSystem::cmds_output_set_frame(char *recv_buf, int recv_len) {
 
-#ifdef WITH_AAVE
-    //hack
-    if (audio_engine == 1) { // TODO symbol for the audio engine (issue #3)
-        set_aave_gain(10);
-        get_aave_engine()->reverb->level = 0.3;
-    }
-#endif
-    
 	//int start_frame = ntohl(*(long*)(recv_buf + 2)); // ignore it
     delay = ntohl(*(long*)(recv_buf + 6));
     start_keyframes(delay);

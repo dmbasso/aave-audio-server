@@ -36,7 +36,6 @@ class AcousticAVEModuleRenderer:
             mixbuff = None
             for chn in self.channels:
                 chn.render()
-                break
 
     def feed_channels(self):
         self.time += self.row_length
@@ -65,6 +64,10 @@ class Channel:
         self.phase = 0
         self.frequency = 0
         self.instrument = self.renderer.mod.instruments[0]
+        with self.renderer.srv.packet() as pkt:
+            self.src = pkt.add_source()
+            pkt.set_sound_file(self.src, wave_path)
+            pkt.clear_keyframes(self.src)
 
     def set_note(self, note):
         if note.has(xm.NOTE):
@@ -79,56 +82,39 @@ class Channel:
 
     def render(self):
         if self.frequency and self.volume:
-            with self.srv.packet() as pkt:
-                pkt.add_keyframe(self.idx, int(self.time * 1000))
+            with self.renderer.srv.packet() as pkt:
+                pkt.add_keyframe(self.src, int(self.renderer.time * 1000),
+                                 note_ratio=self.frequency / 110.)
 
 
 def play():
     from music import mod
-    srv = client.AudioServerInterface()
+    srv = AudioServerInterface()
     with srv.packet() as pkt:
-	    pkt.set_input_param(pkt.input_param.audio_engine, 0)
-	    pkt.set_input_param(pkt.input_param.mode, pkt.modes.realtime)
+        pkt.set_input_param(pkt.input_param.mode, pkt.modes.iterative)
+        pkt.set_input_param(pkt.input_param.audio_engine, 0)
+        #pkt.set_input_param(pkt.input_param.mode, pkt.modes.realtime)
+        #pkt.set_input_param(pkt.input_param.hrtf, pkt.hrtf.mit)
     renderer = AcousticAVEModuleRenderer(mod, srv)
     renderer.render()
     with srv.packet() as pkt:
         pkt.output_set_frame(0, 0)
+        pkt.output_write_frames(int(renderer.time * 44100))
+        pkt.output_iterate()
 
 
 def write_square_wave(length=None, sample_rate=44100):
     if length is None:
         length = sample_rate  # 1s
-    period = sample_rate / 220  # A3
+    period = sample_rate / 110  # A2
     phases = np.arange(length) * np.pi / period
     wav = np.tanh(np.sin(phases) * 10)  # square the sin
-    wav = wav / wav.max() * 32000
+    wav = wav / wav.max() * 15000
     wavfile.write(wave_path, sample_rate, wav.astype(np.uint16))
 
 
+if not os.path.exists(wave_path):
+    write_square_wave(10 * 44100)
 
-#write_square_wave()
-
-
-srv = AudioServerInterface()
-with srv.packet() as pkt:
-    pkt.set_input_param(pkt.input_param.hrtf, pkt.hrtf.cipic)
-    pkt.set_input_param(pkt.input_param.audio_engine, 1)
-    pkt.set_input_param(pkt.input_param.mode, pkt.modes.iterative)
-
-# add sound sources
-with srv.packet() as pkt:
-    src = pkt.add_source()
-    pkt.set_sound_file(src, wave_path)
-    pkt.clear_keyframes(src)
-    pkt.add_keyframe(src, 200)
-for i in range(10):
-    with srv.packet() as pkt:
-        pkt.add_keyframe(src, 400 + 100 * i, pos=(float(i) / 2, 0, 0))
-#        pkt.add_keyframe(src, 400 + 100 * i, pos=(0, float(i), 0))
-
-
-with srv.packet() as pkt:
-    pkt.output_set_frame(0, 0)
-    pkt.output_write_frames(220500)
-    pkt.output_iterate()
+play()
 

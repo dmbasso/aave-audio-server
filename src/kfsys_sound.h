@@ -38,6 +38,7 @@ class Sound {
         static Sound* get_sound(string name);
         void convert_stereo_to_mono();
         void write_sound_file();
+        void get_stereo_frame(short *dest, float position);
 };
 
 #endif

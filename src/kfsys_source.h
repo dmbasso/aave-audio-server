@@ -34,7 +34,8 @@ class Source {
     	int keyframe_active;
     	uint64_t keyframe_start_position;
     	int current_keyframe;
-    	int sample_position;
+        float sample_position;
+        float note_ratio;
     	
     	Source();
     	void clear_keyframes();

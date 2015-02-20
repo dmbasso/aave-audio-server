@@ -80,3 +80,19 @@ void Sound::write_sound_file() {
 	ofs.write((char *) &header, sizeof(WavHeader));
 	ofs.write((char *) samples, header.datachunk_size);
 }
+
+void Sound::get_stereo_frame(short *dest, float position)
+{
+    if (position < 0 || position > length - 2) {
+        dest[0] = dest[1] = 0;
+        return;
+    }
+    int p = (int)position;
+    float f = position - p;
+    if (channels == 1) {
+        dest[1] = dest[0] = (short)((1 - f) * samples[p] + f * samples[p + 1]);
+    } else {
+        dest[0] = (short)((1 - f) * samples[p * 2] + f * samples[p * 2 + 2]);
+        dest[1] = (short)((1 - f) * samples[p * 2 + 1] + f * samples[p * 2 + 3]);
+    }
+}

@@ -9,6 +9,7 @@ class Keyframe {
 		int flags;
 		Sound *snd;
 		float pos[3];
+		float note_ratio;
 		
 		Keyframe() { snd = NULL; }
 };

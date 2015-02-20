@@ -17,6 +17,7 @@ Source::Source() {
     sound = NULL;
     keyframe_active = 0;
     sample_position = -1;
+    note_ratio = 1;
     current_keyframe = -1;
     loop = 0;
 }
@@ -71,26 +72,15 @@ void Source::render(uint64_t global_position, short *buff, int frames) {
         }
         // now we render the current sound (if any) until the limit
         if (sound && sound->samples && sample_position >= 0) {
-            // but it might be less than what our sound has left
-            int remaining = sound->length - sample_position;
-            if (remaining > limit) {
-                remaining = limit;
-            }
-            for (i=in_buff_pos; i<remaining; i++) {
-                if (sound->channels == 1) {
-                    short sample = sound->samples[sample_position + i - in_buff_pos]; 
-                    buff[i * 2] += sample;
-                    buff[i * 2 + 1] += sample;
-                } else {
-                    buff[i * 2] += sound->samples[(sample_position + i - in_buff_pos) * 2]; 
-                    buff[i * 2 + 1] += sound->samples[(sample_position + i - in_buff_pos) * 2 + 1]; 
+            for (i=in_buff_pos; i<limit; i++) {
+                short samples[2];
+                sound->get_stereo_frame(samples, sample_position);
+                buff[i * 2] += samples[0];
+                buff[i * 2 + 1] += samples[1];
+                sample_position += note_ratio;
+                if (sample_position >= sound->length) {
+                    sample_position = loop ? 0 : -1;
                 }
-            }
-            sample_position += remaining - in_buff_pos;
-            if (sample_position >= sound->length) {
-                sample_position = loop ? 0 : -1;
-                in_buff_pos = frames - remaining;
-                continue;
             }
         }
         if (current_keyframe < keyframes.size()
@@ -106,6 +96,11 @@ void Source::render(uint64_t global_position, short *buff, int frames) {
                     keyframes[current_keyframe].pos[0],
                     keyframes[current_keyframe].pos[1],
                     keyframes[current_keyframe].pos[2]);
+            }
+            if (keyframes[current_keyframe].flags & 8) {
+                note_ratio = keyframes[current_keyframe].note_ratio;
+            } else {
+                note_ratio = 1;
             }
             if (1) { // src->keyframes[src->current_keyframe].flags & PLAY
                 sample_position = 0;
@@ -195,13 +190,20 @@ short Source::handle_add_keyframe(char *recv_buf, int recv_len) {
 	kf.flags = recv_buf[3];
 	// convert time from milliseconds to audio frames at 44.1KHz
 	kf.start = ntohl(*(long*)(recv_buf + 4)) * 44100 / 1000;
-	
+    recv_buf += 8;
+
 	if (kf.flags & 2) {
-		kf.pos[0] = unpack_fl(recv_buf + 8);
-		kf.pos[1] = unpack_fl(recv_buf + 12);
-		kf.pos[2] = unpack_fl(recv_buf + 16);	
+		kf.pos[0] = unpack_fl(recv_buf);
+		kf.pos[1] = unpack_fl(recv_buf + 4);
+		kf.pos[2] = unpack_fl(recv_buf + 8);
 		retv += 3 * 4;
+        recv_buf += 12;
 	}
+    if (kf.flags & 8) {
+	    kf.note_ratio = unpack_fl(recv_buf);
+	    retv += 4;
+	    recv_buf += 4;
+    }
 	//if (kf.flags & anything_else) will fuck up;
 	keyframes.push_back(kf);
 
