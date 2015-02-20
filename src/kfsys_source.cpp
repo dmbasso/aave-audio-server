@@ -180,7 +180,7 @@ short Source::handle_datagram(char *recv_buf, int recv_len) {
 	    }
 		case source_cmds::add_keyframes:
 		{
-            return 3 + handle_add_keyframe(recv_buf, recv_len);
+            return handle_add_keyframe(recv_buf, recv_len);
 	    }
 	}
 }
