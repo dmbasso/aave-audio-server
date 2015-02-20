@@ -297,7 +297,7 @@ short KFSystem::cmds_listener_set_position(char *recv_buf, int recv_len) {
 
 	set_listener_position(unpack_fl(recv_buf+1),unpack_fl(recv_buf+5),unpack_fl(recv_buf+9));
 	set_listener_orientation(unpack_fl(recv_buf+13),unpack_fl(recv_buf+17),unpack_fl(recv_buf+21));
-	printf("listener position = %.2f - %.2f - %.2f\n", unpack_fl(recv_buf+1), unpack_fl(recv_buf+5), unpack_fl(recv_buf+9));
+	//printf("listener position = %.2f - %.2f - %.2f\n", unpack_fl(recv_buf+1), unpack_fl(recv_buf+5), unpack_fl(recv_buf+9));
 	return 25;
 }
 
@@ -391,7 +391,7 @@ short KFSystem::handle_reverb_cmds(char *recv_buf, int recv_len) {
 short KFSystem::handle_geometry_cmds(char *recv_buf, int recv_len) {
 
 	short retv=0;
-	
+
 	switch (static_cast<geometry_cmds>(recv_buf[1]))
 	{
 		case geometry_cmds::add:

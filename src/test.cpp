@@ -40,7 +40,7 @@ short set_hrtf (short hrtf) {
 }
 
 void set_listener_position(float x, float y, float z) {
-	std::cout << "setting listener position: " << x << y << z << endl;
+	std::cout << "setting listener position: " << x << ", " << y << ", " << z << endl;
 	sys.set_listener_position(x,y,z);
 }
 

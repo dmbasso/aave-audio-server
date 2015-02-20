@@ -3,7 +3,7 @@ cmake_minimum_required(VERSION 2.8)
 PROJECT(aave-audio-server)
 
 OPTION(SERVER "AcousticAVE Audio Server" ON)
-OPTION(2DVIEW "2D Audio Visualizer" OFF)
+OPTION(2DVIEW "2D Audio Visualizer" ON)
 OPTION(BOOST_TEST "Boost Test" OFF)
 OPTION(WITH_AAVE "Link against libaave" ON)
 
@@ -18,7 +18,7 @@ if(SERVER)
 		SET(SOURCES src/kfsys_interface.cpp src/alsa_interface.cpp
 			src/aave_interface.cpp src/kfsys_sound.cpp
 			src/kfsys_source.cpp src/util.cpp
-			src/main_test_udp.cpp)
+			src/main.cpp)
 		FIND_LIBRARY(AAVE_LIBRARY libaave.a "../libaave")
 		ADD_EXECUTABLE(aave-audio-server ${SOURCES})
 		TARGET_LINK_LIBRARIES(aave-audio-server asound ${AAVE_LIBRARY})
@@ -26,7 +26,7 @@ if(SERVER)
 		SET(SOURCES src/kfsys_interface.cpp src/alsa_interface.cpp
 			src/kfsys_sound.cpp
 			src/kfsys_source.cpp src/util.cpp
-			src/main_test_udp.cpp)
+			src/main.cpp)
 		ADD_EXECUTABLE(aave-audio-server ${SOURCES})
 		TARGET_LINK_LIBRARIES(aave-audio-server asound)
 	ENDIF()
